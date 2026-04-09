@@ -15,8 +15,31 @@ document.addEventListener('DOMContentLoaded', () => {
         entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
         logContent.appendChild(entry);
         logContent.scrollTop = logContent.scrollHeight;
+        
+        // Let <details> open if there's an error
+        if (type === 'error') {
+            debugLog.open = true;
+        }
         debugLog.classList.remove('hidden');
     }
+
+    // Tab Switching Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanels.forEach(p => p.classList.add('hidden'));
+
+            btn.classList.add('active');
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+
+            // Force Chart.js to resize/remount nicely on unhide
+            window.dispatchEvent(new Event('resize'));
+        });
+    });
 
     const chartManager = new ChartManager();
 
@@ -59,6 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const analyzer = new DataAnalyzer(rawData);
 
+            // Hide Upload elements, reveal Dashboard properly
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('uploadHeader').classList.remove('hidden');
+
             // 1. Dashboard Metrics
             updateDashboardMetrics(analyzer);
 
@@ -67,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chartManager.renderVolumeChart(analyzer.getVolumeByQuarter());
             chartManager.renderCustomerChart(analyzer.getRevenueByCustomer());
             chartManager.renderProductChart(analyzer.getRevenueByProduct());
+            chartManager.renderNewVsReturningChart(analyzer.getNewVsReturningMetrics());
 
             // 3. Boss V2 Charts (rendered as standalone functions to avoid caching issues)
             renderTop20Chart(analyzer.getTopProductsByQuantity(20));
@@ -173,6 +201,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('val-revenue').textContent = colFormatter.format(analyzer.getTotalRevenue());
         document.getElementById('sub-revenue').textContent = `${analyzer.getTotalTransactions().toLocaleString()} orders processed`;
+
+        const momData = analyzer.getMoMChange();
+        if (momData) {
+            document.getElementById('val-mom').textContent = (momData.isPositive ? '+' : '') + momData.pctChange + '%';
+            document.getElementById('sub-mom').textContent = `vs ${momData.previousMonth}`;
+            
+            // Add trend to Revenue card as well
+            const trendRev = document.getElementById('trend-revenue');
+            trendRev.className = `kpi-trend ${momData.isPositive ? 'trend-up' : 'trend-down'}`;
+            trendRev.innerHTML = `${momData.isPositive ? '↑' : '↓'} ${Math.abs(momData.pctChange)}%`;
+        } else {
+            document.getElementById('val-mom').textContent = '-';
+            document.getElementById('sub-mom').textContent = 'Not enough data';
+            document.getElementById('trend-revenue').className = 'kpi-trend trend-neutral';
+        }
+
+        document.getElementById('val-aov').textContent = colFormatter.format(analyzer.getAverageOrderValue());
+        document.getElementById('val-rpc').textContent = colFormatter.format(analyzer.getRevenuePerCustomer());
+        document.getElementById('val-clv').textContent = colFormatter.format(analyzer.getRevenuePerCustomer());
 
         const bestMonth = analyzer.getBestSalesMonth();
         document.getElementById('val-best-month').textContent = bestMonth.month !== '-' ? bestMonth.month : '-';

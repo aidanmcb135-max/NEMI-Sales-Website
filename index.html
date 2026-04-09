@@ -8,7 +8,7 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=9">
     <!-- Chart.js & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -45,13 +45,26 @@
             </div>
             <div id="uploadStatus" class="status-message"></div>
 
-            <div id="debugLog" class="debug-log hidden">
-                <div class="log-header">Process Logs</div>
-                <div id="logContent" class="log-content"></div>
+            <div class="upload-header hidden" id="uploadHeader">
+                <button class="upload-mini-btn" onclick="document.getElementById('fileInput').click()">Upload New Data</button>
             </div>
+
+            <details id="debugLog" class="debug-log hidden">
+                <summary class="log-header">Process Logs (Developer)</summary>
+                <div id="logContent" class="log-content"></div>
+            </details>
         </section>
 
         <section id="dashboard" class="dashboard-content hidden">
+            <!-- Tabs Nav -->
+            <div class="tabs-nav">
+                <button class="tab-btn active" data-tab="tab-overview">Overview</button>
+                <button class="tab-btn" data-tab="tab-products">Products</button>
+                <button class="tab-btn" data-tab="tab-customers">Customers</button>
+            </div>
+
+            <!-- TAB 1: OVERVIEW -->
+            <div id="tab-overview" class="tab-panel active">
             <!-- Summary Cards -->
             <div class="metrics-grid">
                 <div class="kpi-card">
@@ -60,7 +73,32 @@
                         <div class="kpi-icon">£</div>
                     </div>
                     <div class="kpi-value" id="val-revenue">£0</div>
+                    <div class="kpi-trend trend-neutral" id="trend-revenue"></div>
                     <div class="kpi-subtitle" id="sub-revenue">0 orders processed</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">MOM REVENUE GROWTH</span>
+                        <div class="kpi-icon">📈</div>
+                    </div>
+                    <div class="kpi-value" id="val-mom">-</div>
+                    <div class="kpi-subtitle" id="sub-mom">vs previous month</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">AVERAGE ORDER VALUE</span>
+                        <div class="kpi-icon">🛒</div>
+                    </div>
+                    <div class="kpi-value" id="val-aov">£0</div>
+                    <div class="kpi-subtitle">Per invoice</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">REV PER CUSTOMER</span>
+                        <div class="kpi-icon">👤</div>
+                    </div>
+                    <div class="kpi-value" id="val-rpc">£0</div>
+                    <div class="kpi-subtitle">Average overall</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-header">
@@ -84,7 +122,16 @@
                         <div class="kpi-icon">👥</div>
                     </div>
                     <div class="kpi-value" id="val-total-customers">0</div>
+                    <div class="kpi-trend trend-neutral" id="trend-customers"></div>
                     <div class="kpi-subtitle">Active accounts</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">AVG LIFETIME VALUE</span>
+                        <div class="kpi-icon">💎</div>
+                    </div>
+                    <div class="kpi-value" id="val-clv">£0</div>
+                    <div class="kpi-subtitle">All-time per customer</div>
                 </div>
             </div>
 
@@ -95,85 +142,96 @@
                     <div class="chart-container"><canvas id="revenueChart"></canvas></div>
                 </div>
                 <div class="chart-card">
-                    <div class="card-header">SALES VOLUME BY QUARTER</div>
-                    <div class="chart-container"><canvas id="volumeChart"></canvas></div>
+                    <div class="card-header">NEW VS RETURNING REVENUE</div>
+                    <div class="chart-container"><canvas id="newVsReturningChart"></canvas></div>
                 </div>
             </div>
+            </div> <!-- End Tab Overview -->
 
-            <!-- Charts Section 2 -->
-            <div class="charts-grid bottom-charts">
-                <div class="chart-card">
-                    <div class="card-header">TOP 10 CUSTOMERS BY REVENUE</div>
-                    <div class="chart-container"><canvas id="customerChart"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <div class="card-header">REVENUE BREAKDOWN BY PRODUCT</div>
-                    <div class="chart-container donut-container"><canvas id="productChart"></canvas></div>
-                </div>
-            </div>
-
-            <!-- Enhanced Analytics Section -->
-            <h2 class="section-divider">Detailed Product Analytics</h2>
-
-            <div class="charts-grid top-charts">
-                <div class="chart-card chart-card-tall">
-                    <div class="card-header">TOP 20 PRODUCTS (BY UNITS SOLD)</div>
-                    <div class="chart-container chart-tall"><canvas id="top20Chart"></canvas></div>
-                </div>
-                <div class="chart-card chart-card-tall">
-                    <div class="card-header">TOP 10 PRODUCTS OVER TIME</div>
-                    <div class="chart-container chart-tall"><canvas id="top10TrendsChart"></canvas></div>
-                </div>
-            </div>
-
-            <!-- Frequency & Churn Section -->
-            <h2 class="section-divider">Customer Activity & Retention</h2>
-
-            <div class="tables-grid tables-grid-4">
-                <!-- Churn Analysis -->
-                <div class="chart-card churn-card">
-                    <div class="card-header churn-header-info">AT RISK (30-59 DAYS)</div>
-                    <div class="list-container" id="churn30List">
-                        <!-- Populated by JS -->
+            <!-- TAB 2: PRODUCTS -->
+            <div id="tab-products" class="tab-panel hidden">
+                <h2 class="section-divider" style="margin-top: 0;">Product Analytics</h2>
+                <div class="charts-grid bottom-charts">
+                    <div class="chart-card">
+                        <div class="card-header">SALES VOLUME BY QUARTER</div>
+                        <div class="chart-container"><canvas id="volumeChart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">REVENUE BREAKDOWN BY PRODUCT</div>
+                        <div class="chart-container donut-container"><canvas id="productChart"></canvas></div>
                     </div>
                 </div>
-                <div class="chart-card churn-card">
-                    <div class="card-header churn-header-warning">DORMANT (60-89 DAYS)</div>
-                    <div class="list-container" id="churn60List">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-                <div class="chart-card churn-card">
-                    <div class="card-header churn-header-critical">CHURN RISK (90-180 DAYS)</div>
-                    <div class="list-container" id="churn90List">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-                <div class="chart-card churn-card">
-                    <div class="card-header churn-header-lost">LOST (180+ DAYS)</div>
-                    <div class="list-container" id="churn180List">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-            </div>
 
-            <div class="chart-card full-width-card mt-6">
-                <div class="card-header">CUSTOMER ORDER FREQUENCY (UNIQUE INVOICES PER MONTH)</div>
-                <div class="table-container">
-                    <table class="freq-table" id="frequencyTable">
-                        <!-- Populated by JS -->
-                    </table>
+                <div class="charts-grid top-charts">
+                    <div class="chart-card chart-card-tall">
+                        <div class="card-header">TOP 20 PRODUCTS (BY UNITS SOLD)</div>
+                        <div class="chart-container chart-tall"><canvas id="top20Chart"></canvas></div>
+                    </div>
+                    <div class="chart-card chart-card-tall">
+                        <div class="card-header">TOP 10 PRODUCTS OVER TIME</div>
+                        <div class="chart-container chart-tall"><canvas id="top10TrendsChart"></canvas></div>
+                    </div>
                 </div>
-            </div>
+            </div> <!-- End Tab Products -->
+
+            <!-- TAB 3: CUSTOMERS -->
+            <div id="tab-customers" class="tab-panel hidden">
+                <h2 class="section-divider" style="margin-top: 0;">Customer Demographics</h2>
+                <div class="charts-grid bottom-charts">
+                    <div class="chart-card">
+                        <div class="card-header">TOP 10 CUSTOMERS BY REVENUE</div>
+                        <div class="chart-container"><canvas id="customerChart"></canvas></div>
+                    </div>
+                </div>
+
+                <h2 class="section-divider">Customer Activity & Retention</h2>
+
+                <div class="tables-grid tables-grid-4">
+                    <!-- Churn Analysis -->
+                    <div class="chart-card churn-card">
+                        <div class="card-header churn-header-info">AT RISK (30-59 DAYS)</div>
+                        <div class="list-container" id="churn30List">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="chart-card churn-card">
+                        <div class="card-header churn-header-warning">DORMANT (60-89 DAYS)</div>
+                        <div class="list-container" id="churn60List">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="chart-card churn-card">
+                        <div class="card-header churn-header-critical">CHURN RISK (90-180 DAYS)</div>
+                        <div class="list-container" id="churn90List">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="chart-card churn-card">
+                        <div class="card-header churn-header-lost">LOST (180+ DAYS)</div>
+                        <div class="list-container" id="churn180List">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card full-width-card mt-6">
+                    <div class="card-header">CUSTOMER ORDER FREQUENCY (UNIQUE INVOICES PER MONTH)</div>
+                    <div class="table-container">
+                        <table class="freq-table" id="frequencyTable">
+                            <!-- Populated by JS -->
+                        </table>
+                    </div>
+                </div>
+            </div> <!-- End Tab Customers -->
 
         </section>
     </div>
 
     <!-- Scripts -->
-    <script src="data-loader.js?v=8"></script>
-    <script src="analyzer.js?v=8"></script>
-    <script src="charts.js?v=8"></script>
-    <script src="main.js?v=8"></script>
+    <script src="data-loader.js?v=10"></script>
+    <script src="analyzer.js?v=10"></script>
+    <script src="charts.js?v=10"></script>
+    <script src="main.js?v=10"></script>
 </body>
 
 </html>

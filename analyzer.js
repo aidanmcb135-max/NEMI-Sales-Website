@@ -238,4 +238,78 @@ class DataAnalyzer {
             churned180: churned180.sort((a, b) => b.daysSince - a.daysSince)
         };
     }
+
+    getMoMChange() {
+        const monthly = this.getRevenueByMonth();
+        if (monthly.length < 2) return null;
+        
+        const currentMonth = monthly[monthly.length - 1];
+        const previousMonth = monthly[monthly.length - 2];
+        const pctChange = previousMonth.revenue > 0 ? ((currentMonth.revenue - previousMonth.revenue) / previousMonth.revenue) * 100 : 0;
+        
+        return {
+            currentMonth: currentMonth.month,
+            previousMonth: previousMonth.month,
+            pctChange: pctChange.toFixed(1),
+            isPositive: pctChange >= 0
+        };
+    }
+
+    getAverageOrderValue() {
+        const uniqueInvoices = new Set();
+        this.data.forEach(row => {
+            if (row.invoiceNo && row.invoiceNo !== 'Unknown') {
+                uniqueInvoices.add(row.invoiceNo);
+            }
+        });
+        const totalRevenue = this.getTotalRevenue();
+        return uniqueInvoices.size > 0 ? (totalRevenue / uniqueInvoices.size) : 0;
+    }
+
+    getRevenuePerCustomer() {
+        const totalRevenue = this.getTotalRevenue();
+        const totalCustomers = this.getTotalCustomers();
+        return totalCustomers > 0 ? (totalRevenue / totalCustomers) : 0;
+    }
+
+    getNewVsReturningMetrics() {
+        const firstPurchaseMap = {};
+        this.data.forEach(row => {
+             const customer = row.customer || 'Unknown';
+             if (row.monthKey === 'Unknown' || isNaN(row.transactionDate.getTime())) return;
+             if (!firstPurchaseMap[customer] || row.transactionDate < firstPurchaseMap[customer]) {
+                 firstPurchaseMap[customer] = row.transactionDate;
+             }
+        });
+
+        const monthlyData = {};
+        this.data.forEach(row => {
+             if (row.monthKey === 'Unknown' || isNaN(row.transactionDate.getTime())) return;
+             const customer = row.customer || 'Unknown';
+             const isNew = (row.transactionDate.getFullYear() === firstPurchaseMap[customer].getFullYear() && 
+                            row.transactionDate.getMonth() === firstPurchaseMap[customer].getMonth());
+             
+             if (!monthlyData[row.monthKey]) {
+                 monthlyData[row.monthKey] = { label: row.monthLabel, newRevenue: 0, returningRevenue: 0 };
+             }
+
+             if (isNew) {
+                 monthlyData[row.monthKey].newRevenue += row.amount;
+             } else {
+                 monthlyData[row.monthKey].returningRevenue += row.amount;
+             }
+        });
+
+        const labels = Object.keys(monthlyData).sort();
+        const newD = labels.map(key => monthlyData[key].newRevenue);
+        const returningD = labels.map(key => monthlyData[key].returningRevenue);
+
+        return {
+             labels: labels.map(key => monthlyData[key].label),
+             datasets: [
+                 { label: 'Returning Revenue', data: returningD },
+                 { label: 'New Revenue', data: newD }
+             ]
+        };
+    }
 }

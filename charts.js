@@ -9,6 +9,7 @@ class ChartManager {
         this.productChart = null;
         this.top20Chart = null;
         this.top10TrendsChart = null;
+        this.newVsReturningChart = null;
 
         // Setup Chart.js global defaults for Base44 light theme
         Chart.defaults.color = '#64748B';
@@ -183,8 +184,12 @@ class ChartManager {
                 cutout: '65%',
                 plugins: {
                     legend: {
-                        position: 'right',
-                        labels: { usePointStyle: true, padding: 15, font: { size: 11 } }
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            padding: 20
+                        }
                     },
                     tooltip: {
                         callbacks: {
@@ -214,7 +219,7 @@ class ChartManager {
                 datasets: [{
                     label: 'Units Sold',
                     data: data,
-                    backgroundColor: '#245A84',
+                    backgroundColor: '#1E496B',
                     borderRadius: 4,
                     barThickness: 'flex',
                     maxBarThickness: 16
@@ -245,11 +250,16 @@ class ChartManager {
         trendData.datasets.forEach((ds, i) => {
             ds.borderColor = palette[i % palette.length];
             ds.backgroundColor = palette[i % palette.length];
-            ds.borderWidth = 2;
-            ds.pointRadius = 3;
-            ds.pointHoverRadius = 5;
+            ds.borderWidth = i < 3 ? 3 : 2;  // Highlight top 3
+            ds.pointRadius = i < 3 ? 4 : 3;
+            ds.pointHoverRadius = 6;
             ds.fill = false;
             ds.tension = 0.3;
+            
+            // Hide lines 6-10 by default to reduce clutter
+            if (i >= 5) {
+                ds.hidden = true;
+            }
         });
 
         if (this.top10TrendsChart) this.top10TrendsChart.destroy();
@@ -276,5 +286,49 @@ class ChartManager {
                 }
             }
         });
+    }
+
+    renderNewVsReturningChart(metricsData) {
+        const ctx = document.getElementById('newVsReturningChart').getContext('2d');
+
+        if (this.newVsReturningChart) this.newVsReturningChart.destroy();
+
+        this.newVsReturningChart = new Chart(ctx, {
+            type: 'bar',
+            data: metricsData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true, boxWidth: 8, font: { size: 10 } }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        callbacks: {
+                            label: (context) => context.dataset.label + ': £' + context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 })
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        grid: { color: '#E5E7EB', drawBorder: false, borderDash: [5, 5] },
+                        beginAtZero: true,
+                        ticks: { callback: value => '£' + (value >= 1000 ? (value / 1000) + 'k' : value) }
+                    }
+                }
+            }
+        });
+        
+        // ensure nice colors
+        this.newVsReturningChart.data.datasets[0].backgroundColor = '#0F2C41'; // Returning (navy)
+        this.newVsReturningChart.data.datasets[1].backgroundColor = '#10b981'; // New (green)
+        this.newVsReturningChart.update();
     }
 }
