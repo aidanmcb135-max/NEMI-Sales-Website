@@ -220,6 +220,13 @@
 
                 <div class="chart-card full-width-card mt-6">
                     <div class="card-header">CUSTOMER ORDER FREQUENCY (UNIQUE INVOICES PER MONTH)</div>
+                    <div id="freq-search-bar" style="display: none; align-items: center; justify-content: flex-end; gap: 12px; padding: 10px 1.5rem 0 1.5rem;">
+                        <span id="freq-result-count" style="font-size: 12px; color: #64748B; white-space: nowrap;"></span>
+                        <div style="position: relative; width: 220px;">
+                            <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #94a3b8; pointer-events: none;">&#x1F50D;</span>
+                            <input type="text" id="freq-search-input" placeholder="Search customers..." style="width: 220px; height: 34px; font-size: 13px; font-family: inherit; border: 0.5px solid #E2E8F0; border-radius: 8px; padding-left: 32px; padding-right: 10px; background: #FFFFFF; outline: none; transition: border-color 0.15s ease;" onfocus="this.style.borderColor='#1D9E75'" onblur="this.style.borderColor='#E2E8F0'">
+                        </div>
+                    </div>
                     <div class="table-container">
                         <table class="freq-table" id="frequencyTable">
                             <!-- Populated by JS -->
@@ -273,6 +280,84 @@
             observer.observe(document.getElementById('churn30List'), config);
             observer.observe(document.getElementById('churn60List'), config);
             observer.observe(document.getElementById('churn90List'), config);
+        });
+    </script>
+
+    <!-- Customer Search & Filter Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const freqTable = document.getElementById('frequencyTable');
+            const searchBar = document.getElementById('freq-search-bar');
+            const searchInput = document.getElementById('freq-search-input');
+            const resultCount = document.getElementById('freq-result-count');
+            let debounceTimer = null;
+            let noMatchRow = null;
+
+            // Show the search bar once the table has data
+            const tableObserver = new MutationObserver(() => {
+                const tbody = freqTable.querySelector('tbody');
+                if (tbody && tbody.rows.length > 0) {
+                    searchBar.style.display = 'flex';
+                    const total = tbody.rows.length;
+                    resultCount.textContent = `${total} customers total`;
+                    // Reset search on new data
+                    searchInput.value = '';
+                    if (noMatchRow) { noMatchRow.remove(); noMatchRow = null; }
+                }
+            });
+            tableObserver.observe(freqTable, { childList: true, subtree: true });
+
+            function performFilter() {
+                const tbody = freqTable.querySelector('tbody');
+                if (!tbody) return;
+
+                const term = searchInput.value.trim().toLowerCase();
+                const rows = Array.from(tbody.rows);
+                const totalRows = rows.length;
+
+                // Remove any existing no-match message
+                if (noMatchRow) { noMatchRow.remove(); noMatchRow = null; }
+
+                // Clear highlights and show all if empty
+                if (term === '') {
+                    rows.forEach(row => {
+                        row.style.display = '';
+                        const nameCell = row.cells[0];
+                        if (nameCell) nameCell.style.background = '';
+                    });
+                    resultCount.textContent = `${totalRows} customers total`;
+                    return;
+                }
+
+                let visibleCount = 0;
+                rows.forEach(row => {
+                    const nameCell = row.cells[0];
+                    if (!nameCell) return;
+                    const name = nameCell.textContent.toLowerCase();
+                    if (name.includes(term)) {
+                        row.style.display = '';
+                        nameCell.style.background = '#E1F5EE';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                        nameCell.style.background = '';
+                    }
+                });
+
+                resultCount.textContent = `Showing ${visibleCount} of ${totalRows} customers`;
+
+                if (visibleCount === 0) {
+                    const colCount = freqTable.querySelector('thead tr') ? freqTable.querySelector('thead tr').cells.length : 1;
+                    noMatchRow = document.createElement('tr');
+                    noMatchRow.innerHTML = `<td colspan="${colCount}" style="text-align: center; color: #64748B; font-style: italic; padding: 2rem 1rem;">No customers match that search</td>`;
+                    tbody.appendChild(noMatchRow);
+                }
+            }
+
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(performFilter, 150);
+            });
         });
     </script>
 </body>
