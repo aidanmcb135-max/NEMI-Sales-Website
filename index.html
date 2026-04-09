@@ -12,6 +12,94 @@
     <!-- Chart.js & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        /* Export button styling */
+        .export-csv-btn {
+            font-size: 12px;
+            color: #64748B;
+            border: 0.5px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 5px 10px;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: background 0.15s ease;
+        }
+        .export-csv-btn:hover { background: #F4F7F8; }
+        .export-csv-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .export-csv-btn.disabled:hover { background: transparent; }
+        .export-error {
+            font-size: 11px;
+            color: #ef4444;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        .pdf-btn {
+            font-size: 12px;
+            color: #64748B;
+            border: 0.5px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 5px 10px;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: background 0.15s ease;
+        }
+        .pdf-btn:hover { background: #F4F7F8; }
+        .pdf-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pdf-btn.disabled:hover { background: transparent; }
+
+        /* Print-specific styles */
+        @media print {
+            body.print-mode .upload-section,
+            body.print-mode #uploadHeader,
+            body.print-mode .debug-log,
+            body.print-mode #freq-search-bar,
+            body.print-mode .export-csv-btn,
+            body.print-mode .pdf-btn,
+            body.print-mode .tabs-nav,
+            body.print-mode .upload-mini-btn { display: none !important; }
+
+            body.print-mode .tab-panel { display: block !important; animation: none !important; }
+            body.print-mode .tab-panel.hidden { display: block !important; }
+            body.print-mode .dashboard-content { display: block !important; }
+
+            body.print-mode .chart-card,
+            body.print-mode .kpi-card {
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+                break-inside: avoid;
+            }
+
+            body.print-mode .app-container { max-width: 100%; padding: 0.5rem; }
+
+            @page {
+                margin: 1.5cm;
+                @bottom-center {
+                    content: "NEMI Teas Sales Analytics · Printed " attr(data-print-date);
+                    font-size: 9px;
+                    color: #999;
+                }
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -45,7 +133,8 @@
             </div>
             <div id="uploadStatus" class="status-message"></div>
 
-            <div class="upload-header hidden" id="uploadHeader">
+            <div class="upload-header hidden" id="uploadHeader" style="gap: 8px;">
+                <button class="pdf-btn disabled" id="btn-pdf" title="Upload a file first">↓ Download PDF</button>
                 <button class="upload-mini-btn" onclick="document.getElementById('fileInput').click()">Upload New Data</button>
             </div>
 
@@ -167,8 +256,8 @@
 
                 <div class="charts-grid top-charts">
                     <div class="chart-card chart-card-tall" id="chart-card-top20">
-                        <div class="card-header">TOP 20 PRODUCTS (BY UNITS SOLD)</div>
-                        <div class="chart-container chart-tall"><canvas id="top20Chart"></canvas></div>
+                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">TOP 20 PRODUCTS (BY UNITS SOLD)</div><button class="export-csv-btn disabled" id="btn-export-top20" title="Upload a file first">↓ Export CSV</button></div>
+                        <div class="chart-container chart-tall" style="margin-top:1rem"><canvas id="top20Chart"></canvas></div>
                     </div>
                     <div class="chart-card chart-card-tall">
                         <div class="card-header">TOP 10 PRODUCTS OVER TIME</div>
@@ -182,12 +271,15 @@
                 <h2 class="section-divider" style="margin-top: 0;">Customer Demographics</h2>
                 <div class="charts-grid bottom-charts">
                     <div class="chart-card">
-                        <div class="card-header">TOP 10 CUSTOMERS BY REVENUE</div>
-                        <div class="chart-container"><canvas id="customerChart"></canvas></div>
+                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">TOP 10 CUSTOMERS BY REVENUE</div><button class="export-csv-btn disabled" id="btn-export-customers" title="Upload a file first">↓ Export CSV</button></div>
+                        <div class="chart-container" style="margin-top:1rem"><canvas id="customerChart"></canvas></div>
                     </div>
                 </div>
 
-                <h2 class="section-divider">Customer Activity & Retention</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 class="section-divider" style="flex:1">Customer Activity & Retention</h2>
+                    <button class="export-csv-btn disabled" id="btn-export-retention" title="Upload a file first" style="margin-left:12px; flex-shrink:0;">↓ Export CSV</button>
+                </div>
 
                 <div id="section-customer-activity" style="border-radius: 12px; border: 1px solid transparent; transition: border-color 0.3s ease;">
                 <div class="tables-grid tables-grid-4">
@@ -219,7 +311,7 @@
                 </div>
 
                 <div class="chart-card full-width-card mt-6">
-                    <div class="card-header">CUSTOMER ORDER FREQUENCY (UNIQUE INVOICES PER MONTH)</div>
+                    <div class="card-header-row"><div class="card-header" style="margin-bottom:0">CUSTOMER ORDER FREQUENCY (UNIQUE INVOICES PER MONTH)</div><button class="export-csv-btn disabled" id="btn-export-frequency" title="Upload a file first">↓ Export CSV</button></div>
                     <div id="freq-search-bar" style="display: none; align-items: center; justify-content: flex-end; gap: 12px; padding: 10px 1.5rem 0 1.5rem;">
                         <span id="freq-result-count" style="font-size: 12px; color: #64748B; white-space: nowrap;"></span>
                         <div style="position: relative; width: 220px;">
@@ -359,6 +451,188 @@
                 debounceTimer = setTimeout(performFilter, 150);
             });
         });
+    </script>
+
+    <!-- Export Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let dataLoaded = false;
+
+        // Utility: download a string as a file
+        function downloadCSV(filename, csvString) {
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        // Utility: show temporary error near a button
+        function flashError(btn) {
+            const wrapper = btn.parentElement;
+            const existing = wrapper.querySelector('.export-error');
+            if (existing) existing.remove();
+            const msg = document.createElement('span');
+            msg.className = 'export-error';
+            msg.textContent = 'Export failed — please try again';
+            wrapper.style.position = 'relative';
+            wrapper.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        // Enable all export buttons once data is loaded
+        const dash = document.getElementById('dashboard');
+        const dashObserver = new MutationObserver(() => {
+            if (!dash.classList.contains('hidden')) {
+                dataLoaded = true;
+                document.querySelectorAll('.export-csv-btn, .pdf-btn').forEach(btn => {
+                    btn.classList.remove('disabled');
+                    btn.removeAttribute('title');
+                });
+            }
+        });
+        dashObserver.observe(dash, { attributes: true, attributeFilter: ['class'] });
+
+        // --- 1. Customer Order Frequency CSV ---
+        document.getElementById('btn-export-frequency').addEventListener('click', function() {
+            if (!dataLoaded) return;
+            try {
+                const table = document.getElementById('frequencyTable');
+                const thead = table.querySelector('thead tr');
+                const tbody = table.querySelector('tbody');
+                if (!thead || !tbody) throw new Error('No data');
+
+                const headers = Array.from(thead.cells).map(c => c.textContent.trim());
+                let csv = headers.join(',') + '\n';
+
+                Array.from(tbody.rows).forEach(row => {
+                    if (row.style.display === 'none') return; // respect search filter
+                    if (row.querySelector('td[colspan]')) return; // skip no-match message
+                    const cells = Array.from(row.cells).map(c => {
+                        let val = c.textContent.trim();
+                        if (val === '-') val = '';
+                        // Escape commas in names
+                        if (val.includes(',')) val = '"' + val + '"';
+                        return val;
+                    });
+                    csv += cells.join(',') + '\n';
+                });
+
+                downloadCSV('nemi-order-frequency.csv', csv);
+            } catch (e) { flashError(this); }
+        });
+
+        // --- 2. Customer Activity & Retention CSV ---
+        document.getElementById('btn-export-retention').addEventListener('click', function() {
+            if (!dataLoaded) return;
+            try {
+                const sections = [
+                    { id: 'churn30List', status: 'At Risk' },
+                    { id: 'churn60List', status: 'Dormant' },
+                    { id: 'churn90List', status: 'Churn Risk' },
+                    { id: 'churn180List', status: 'Lost' }
+                ];
+                const rows = [];
+                sections.forEach(sec => {
+                    const items = document.getElementById(sec.id).querySelectorAll('.churn-item');
+                    items.forEach(item => {
+                        const name = item.querySelector('.churn-name').textContent.trim();
+                        const daysText = item.querySelector('.churn-days').textContent.trim();
+                        const daysMatch = daysText.match(/^(\d+)/);
+                        const days = daysMatch ? parseInt(daysMatch[1]) : 0;
+                        const dateMatch = daysText.match(/\((.+)\)/);
+                        const date = dateMatch ? dateMatch[1] : '';
+                        rows.push({ name, status: sec.status, days, date });
+                    });
+                });
+                rows.sort((a, b) => a.days - b.days);
+
+                let csv = 'Customer Name,Status,Days Since Last Order,Last Order Date\n';
+                rows.forEach(r => {
+                    const safeName = r.name.includes(',') ? '"' + r.name + '"' : r.name;
+                    csv += `${safeName},${r.status},${r.days},${r.date}\n`;
+                });
+
+                downloadCSV('nemi-customer-retention.csv', csv);
+            } catch (e) { flashError(this); }
+        });
+
+        // --- 3. Top 10 Customers CSV ---
+        document.getElementById('btn-export-customers').addEventListener('click', function() {
+            if (!dataLoaded) return;
+            try {
+                const canvas = document.getElementById('customerChart');
+                const chart = Chart.getChart(canvas);
+                if (!chart) throw new Error('No chart');
+                const labels = chart.data.labels;
+                const data = chart.data.datasets[0].data;
+
+                let csv = 'Customer Name,Total Revenue\n';
+                labels.forEach((label, i) => {
+                    const safeName = label.includes(',') ? '"' + label + '"' : label;
+                    csv += `${safeName},${parseFloat(data[i]).toFixed(2)}\n`;
+                });
+
+                downloadCSV('nemi-top-customers.csv', csv);
+            } catch (e) { flashError(this); }
+        });
+
+        // --- 4. Top 20 Products CSV ---
+        document.getElementById('btn-export-top20').addEventListener('click', function() {
+            if (!dataLoaded) return;
+            try {
+                const canvas = document.getElementById('top20Chart');
+                const chart = Chart.getChart(canvas);
+                if (!chart) throw new Error('No chart');
+                const labels = chart.data.labels;
+                const data = chart.data.datasets[0].data;
+
+                let csv = 'Product Name,Units Sold\n';
+                labels.forEach((label, i) => {
+                    const safeName = label.includes(',') ? '"' + label + '"' : label;
+                    csv += `${safeName},${data[i]}\n`;
+                });
+
+                downloadCSV('nemi-top-products.csv', csv);
+            } catch (e) { flashError(this); }
+        });
+
+        // --- 5. PDF Export (window.print) ---
+        document.getElementById('btn-pdf').addEventListener('click', function() {
+            if (!dataLoaded) return;
+            try {
+                const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                document.documentElement.setAttribute('data-print-date', today);
+                document.body.classList.add('print-mode');
+
+                // Reveal all hidden tab panels for printing
+                const hiddenPanels = document.querySelectorAll('.tab-panel.hidden');
+                hiddenPanels.forEach(p => p.classList.remove('hidden'));
+
+                // Add a print footer element
+                const footer = document.createElement('div');
+                footer.id = 'print-footer-temp';
+                footer.style.cssText = 'text-align:center; font-size:10px; color:#999; padding:1rem 0; margin-top:2rem; border-top:1px solid #eee;';
+                footer.textContent = `NEMI Teas Sales Analytics · Printed ${today}`;
+                document.querySelector('.app-container').appendChild(footer);
+
+                window.print();
+
+                // Restore after print dialog closes
+                document.body.classList.remove('print-mode');
+                footer.remove();
+
+                // Re-hide non-active tabs
+                document.querySelectorAll('.tab-panel').forEach(p => {
+                    const activeBtn = document.querySelector('.tab-btn.active');
+                    if (activeBtn && p.id !== activeBtn.getAttribute('data-tab')) {
+                        p.classList.add('hidden');
+                    }
+                });
+            } catch (e) { console.error(e); }
+        });
+    });
     </script>
 </body>
 
