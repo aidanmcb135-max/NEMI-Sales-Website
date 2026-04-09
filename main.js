@@ -88,6 +88,15 @@ document.addEventListener('DOMContentLoaded', () => {
         highlightTarget('section-customer-activity');
     });
 
+    // Header Click Navigation (Home)
+    const mainHeader = document.querySelector('.top-nav');
+    if (mainHeader) {
+        mainHeader.addEventListener('click', () => {
+            switchTab('tab-overview');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
     const chartManager = new ChartManager();
 
     // Drag and drop setup
