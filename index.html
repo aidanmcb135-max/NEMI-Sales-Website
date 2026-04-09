@@ -67,7 +67,7 @@
             <div id="tab-overview" class="tab-panel active">
             <!-- Summary Cards -->
             <div class="metrics-grid">
-                <div class="kpi-card">
+                <div class="kpi-card clickable" id="card-revenue">
                     <div class="kpi-header">
                         <span class="kpi-title">TOTAL REVENUE</span>
                         <div class="kpi-icon">£</div>
@@ -100,7 +100,7 @@
                     <div class="kpi-value" id="val-rpc">£0</div>
                     <div class="kpi-subtitle">Average overall</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card clickable" id="card-best-month">
                     <div class="kpi-header">
                         <span class="kpi-title">MOST PROFITABLE MONTH</span>
                         <div class="kpi-icon">↗</div>
@@ -108,7 +108,7 @@
                     <div class="kpi-value" id="val-best-month">-</div>
                     <div class="kpi-subtitle" id="sub-best-month">£0 revenue</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card clickable" id="card-top-product">
                     <div class="kpi-header">
                         <span class="kpi-title">TOP SELLING PRODUCT</span>
                         <div class="kpi-icon">★</div>
@@ -116,7 +116,7 @@
                     <div class="kpi-value" id="val-top-product">-</div>
                     <div class="kpi-subtitle" id="sub-top-product">0 units sold</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card clickable" id="card-active-customers">
                     <div class="kpi-header">
                         <span class="kpi-title">TOTAL CUSTOMERS</span>
                         <div class="kpi-icon">👥</div>
@@ -137,7 +137,7 @@
 
             <!-- Charts Section 1 -->
             <div class="charts-grid top-charts">
-                <div class="chart-card">
+                <div class="chart-card" id="chart-card-revenue">
                     <div class="card-header">REVENUE OVER TIME</div>
                     <div class="chart-container"><canvas id="revenueChart"></canvas></div>
                 </div>
@@ -163,7 +163,7 @@
                 </div>
 
                 <div class="charts-grid top-charts">
-                    <div class="chart-card chart-card-tall">
+                    <div class="chart-card chart-card-tall" id="chart-card-top20">
                         <div class="card-header">TOP 20 PRODUCTS (BY UNITS SOLD)</div>
                         <div class="chart-container chart-tall"><canvas id="top20Chart"></canvas></div>
                     </div>
@@ -186,6 +186,7 @@
 
                 <h2 class="section-divider">Customer Activity & Retention</h2>
 
+                <div id="section-customer-activity" style="border-radius: 12px; border: 1px solid transparent; transition: border-color 0.3s ease;">
                 <div class="tables-grid tables-grid-4">
                     <!-- Churn Analysis -->
                     <div class="chart-card churn-card">
@@ -222,6 +223,7 @@
                         </table>
                     </div>
                 </div>
+                </div> <!-- End Section Customer Activity -->
             </div> <!-- End Tab Customers -->
 
         </section>

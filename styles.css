@@ -633,3 +633,34 @@ details.debug-log summary::marker {
     display: none;
     /* Hide if no trend is applicable */
 }
+
+/* --- V4: Clickable Logic and Target Highlights --- */
+.kpi-card.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kpi-card.clickable:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes highlightGlow {
+    0% {
+        box-shadow: 0 0 0 2px rgba(20, 184, 166, 1);
+        border-color: rgba(20, 184, 166, 1);
+    }
+    10% {
+        box-shadow: 0 0 20px 4px rgba(20, 184, 166, 0.6);
+        border-color: rgba(20, 184, 166, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(20, 184, 166, 0);
+    }
+}
+
+.target-highlight {
+    animation: highlightGlow 1.5s ease-out;
+    border-color: rgba(20, 184, 166, 1) !important;
+}

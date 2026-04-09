@@ -24,6 +24,17 @@ class ChartManager {
         Chart.defaults.plugins.tooltip.usePointStyle = true;
     }
 
+    highlightMonth(monthStr) {
+        if (!this.revenueChart) return;
+        const labels = this.revenueChart.data.labels;
+        const idx = labels.indexOf(monthStr);
+        if (idx !== -1) {
+            this.revenueChart.setActiveElements([{ datasetIndex: 0, index: idx }]);
+            this.revenueChart.tooltip.setActiveElements([{ datasetIndex: 0, index: idx }], { x: 0, y: 0 });
+            this.revenueChart.update();
+        }
+    }
+
     renderRevenueChart(monthlyData) {
         const ctx = document.getElementById('revenueChart').getContext('2d');
         const labels = monthlyData.map(d => d.month);

@@ -27,18 +27,65 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabPanels = document.querySelectorAll('.tab-panel');
 
+    function switchTab(tabId) {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.add('hidden'));
+
+        const btn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+        if (btn) btn.classList.add('active');
+        const panel = document.getElementById(tabId);
+        if (panel) panel.classList.remove('hidden');
+
+        // Force Chart.js to resize/remount nicely on unhide
+        window.dispatchEvent(new Event('resize'));
+    }
+
     tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabPanels.forEach(p => p.classList.add('hidden'));
+        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+    });
 
-            btn.classList.add('active');
-            const targetId = btn.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
+    // KPI Card Click Navigation
+    function highlightTarget(elementId) {
+        const target = document.getElementById(elementId);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Re-trigger animation safely
+            target.classList.remove('target-highlight');
+            void target.offsetWidth; // trigger reflow
+            target.classList.add('target-highlight');
+            
+            setTimeout(() => {
+                target.classList.remove('target-highlight');
+            }, 1500);
+        }
+    }
 
-            // Force Chart.js to resize/remount nicely on unhide
-            window.dispatchEvent(new Event('resize'));
-        });
+    document.getElementById('card-revenue').addEventListener('click', () => {
+        switchTab('tab-overview');
+        highlightTarget('chart-card-revenue');
+    });
+
+    document.getElementById('card-best-month').addEventListener('click', () => {
+        switchTab('tab-overview');
+        highlightTarget('chart-card-revenue');
+        
+        setTimeout(() => { // wait for scroll to finish before tooltip appears
+            const bestMonthVal = document.getElementById('val-best-month').textContent;
+            if (bestMonthVal && bestMonthVal !== '-') {
+                chartManager.highlightMonth(bestMonthVal);
+            }
+        }, 500);
+    });
+
+    document.getElementById('card-top-product').addEventListener('click', () => {
+        switchTab('tab-products');
+        highlightTarget('chart-card-top20');
+    });
+
+    document.getElementById('card-active-customers').addEventListener('click', () => {
+        switchTab('tab-customers');
+        highlightTarget('section-customer-activity');
     });
 
     const chartManager = new ChartManager();
