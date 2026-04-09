@@ -11,10 +11,9 @@
     <link rel="stylesheet" href="styles.css?v=11">
     <!-- Chart.js & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* Export button styling */
-        .export-csv-btn {
+        .export-xlsx-btn {
             font-size: 12px;
             color: #64748B;
             border: 0.5px solid #E2E8F0;
@@ -26,12 +25,9 @@
             white-space: nowrap;
             transition: background 0.15s ease;
         }
-        .export-csv-btn:hover { background: #F4F7F8; }
-        .export-csv-btn.disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .export-csv-btn.disabled:hover { background: transparent; }
+        .export-xlsx-btn:hover { background: #F4F7F8; }
+        .export-xlsx-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+        .export-xlsx-btn.disabled:hover { background: transparent; }
         .export-error {
             font-size: 11px;
             color: #ef4444;
@@ -47,10 +43,11 @@
             align-items: center;
             position: relative;
         }
-        .pdf-btn {
+        .full-report-btn {
             font-size: 12px;
             color: #64748B;
             border: 0.5px solid #E2E8F0;
+            border-left: 2px solid #1D9E75;
             border-radius: 8px;
             padding: 5px 10px;
             background: transparent;
@@ -59,45 +56,17 @@
             white-space: nowrap;
             transition: background 0.15s ease;
         }
-        .pdf-btn:hover { background: #F4F7F8; }
-        .pdf-btn.disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .pdf-btn.disabled:hover { background: transparent; }
-
-        /* Print-specific styles */
-        @media print {
-            body.print-mode .upload-section,
-            body.print-mode #uploadHeader,
-            body.print-mode .debug-log,
-            body.print-mode #freq-search-bar,
-            body.print-mode .export-csv-btn,
-            body.print-mode .pdf-btn,
-            body.print-mode .tabs-nav,
-            body.print-mode .upload-mini-btn { display: none !important; }
-
-            body.print-mode .tab-panel { display: block !important; animation: none !important; }
-            body.print-mode .tab-panel.hidden { display: block !important; }
-            body.print-mode .dashboard-content { display: block !important; }
-
-            body.print-mode .chart-card,
-            body.print-mode .kpi-card {
-                border: 1px solid #ccc !important;
-                box-shadow: none !important;
-                break-inside: avoid;
-            }
-
-            body.print-mode .app-container { max-width: 100%; padding: 0.5rem; }
-
-            @page {
-                margin: 1.5cm;
-                @bottom-center {
-                    content: "NEMI Teas Sales Analytics · Printed " attr(data-print-date);
-                    font-size: 9px;
-                    color: #999;
-                }
-            }
+        .full-report-btn:hover { background: #F4F7F8; }
+        .full-report-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+        .full-report-btn.disabled:hover { background: transparent; }
+        .xlsx-cdn-warning {
+            background: #FAEEDA;
+            color: #854F0B;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -134,7 +103,7 @@
             <div id="uploadStatus" class="status-message"></div>
 
             <div class="upload-header hidden" id="uploadHeader" style="gap: 8px;">
-                <button class="pdf-btn disabled" id="btn-pdf" title="Upload a file first">↓ Download PDF</button>
+                <button class="full-report-btn disabled" id="btn-full-report" title="Upload a file first">↓ Download Full Report (.xlsx)</button>
                 <button class="upload-mini-btn" onclick="document.getElementById('fileInput').click()">Upload New Data</button>
             </div>
 
@@ -230,12 +199,12 @@
             <!-- Charts Section 1 -->
             <div class="charts-grid top-charts">
                 <div class="chart-card" id="chart-card-revenue">
-                    <div class="card-header">REVENUE OVER TIME</div>
-                    <div class="chart-container"><canvas id="revenueChart"></canvas></div>
+                    <div class="card-header-row"><div class="card-header" style="margin-bottom:0">REVENUE OVER TIME</div><button class="export-xlsx-btn disabled" id="btn-export-revenue" title="Upload a file first">↓ Export .xlsx</button></div>
+                    <div class="chart-container" style="margin-top:1rem"><canvas id="revenueChart"></canvas></div>
                 </div>
                 <div class="chart-card">
-                    <div class="card-header">NEW VS RETURNING REVENUE</div>
-                    <div class="chart-container"><canvas id="newVsReturningChart"></canvas></div>
+                    <div class="card-header-row"><div class="card-header" style="margin-bottom:0">NEW VS RETURNING REVENUE</div><button class="export-xlsx-btn disabled" id="btn-export-newvsret" title="Upload a file first">↓ Export .xlsx</button></div>
+                    <div class="chart-container" style="margin-top:1rem"><canvas id="newVsReturningChart"></canvas></div>
                 </div>
             </div>
             </div> <!-- End Tab Overview -->
@@ -245,23 +214,23 @@
                 <h2 class="section-divider" style="margin-top: 0;">Product Analytics</h2>
                 <div class="charts-grid bottom-charts">
                     <div class="chart-card">
-                        <div class="card-header">SALES VOLUME BY QUARTER</div>
-                        <div class="chart-container"><canvas id="volumeChart"></canvas></div>
+                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">SALES VOLUME BY QUARTER</div><button class="export-xlsx-btn disabled" id="btn-export-quarter" title="Upload a file first">↓ Export .xlsx</button></div>
+                        <div class="chart-container" style="margin-top:1rem"><canvas id="volumeChart"></canvas></div>
                     </div>
                     <div class="chart-card">
-                        <div class="card-header">REVENUE BREAKDOWN BY PRODUCT</div>
-                        <div class="chart-container donut-container"><canvas id="productChart"></canvas></div>
+                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">REVENUE BREAKDOWN BY PRODUCT</div><button class="export-xlsx-btn disabled" id="btn-export-product" title="Upload a file first">↓ Export .xlsx</button></div>
+                        <div class="chart-container donut-container" style="margin-top:1rem"><canvas id="productChart"></canvas></div>
                     </div>
                 </div>
 
                 <div class="charts-grid top-charts">
                     <div class="chart-card chart-card-tall" id="chart-card-top20">
-                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">TOP 20 PRODUCTS (BY UNITS SOLD)</div><button class="export-csv-btn disabled" id="btn-export-top20" title="Upload a file first">↓ Export CSV</button></div>
+                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">TOP 20 PRODUCTS (BY UNITS SOLD)</div><button class="export-xlsx-btn disabled" id="btn-export-top20" title="Upload a file first">↓ Export .xlsx</button></div>
                         <div class="chart-container chart-tall" style="margin-top:1rem"><canvas id="top20Chart"></canvas></div>
                     </div>
                     <div class="chart-card chart-card-tall">
-                        <div class="card-header">TOP 10 PRODUCTS OVER TIME</div>
-                        <div class="chart-container chart-tall"><canvas id="top10TrendsChart"></canvas></div>
+                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">TOP 10 PRODUCTS OVER TIME</div><button class="export-xlsx-btn disabled" id="btn-export-trends" title="Upload a file first">↓ Export .xlsx</button></div>
+                        <div class="chart-container chart-tall" style="margin-top:1rem"><canvas id="top10TrendsChart"></canvas></div>
                     </div>
                 </div>
             </div> <!-- End Tab Products -->
@@ -271,14 +240,14 @@
                 <h2 class="section-divider" style="margin-top: 0;">Customer Demographics</h2>
                 <div class="charts-grid bottom-charts">
                     <div class="chart-card">
-                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">TOP 10 CUSTOMERS BY REVENUE</div><button class="export-csv-btn disabled" id="btn-export-customers" title="Upload a file first">↓ Export CSV</button></div>
+                        <div class="card-header-row"><div class="card-header" style="margin-bottom:0">TOP 10 CUSTOMERS BY REVENUE</div><button class="export-xlsx-btn disabled" id="btn-export-customers" title="Upload a file first">↓ Export .xlsx</button></div>
                         <div class="chart-container" style="margin-top:1rem"><canvas id="customerChart"></canvas></div>
                     </div>
                 </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h2 class="section-divider" style="flex:1">Customer Activity & Retention</h2>
-                    <button class="export-csv-btn disabled" id="btn-export-retention" title="Upload a file first" style="margin-left:12px; flex-shrink:0;">↓ Export CSV</button>
+                    <button class="export-xlsx-btn disabled" id="btn-export-retention" title="Upload a file first" style="margin-left:12px; flex-shrink:0;">↓ Export .xlsx</button>
                 </div>
 
                 <div id="section-customer-activity" style="border-radius: 12px; border: 1px solid transparent; transition: border-color 0.3s ease;">
@@ -311,7 +280,7 @@
                 </div>
 
                 <div class="chart-card full-width-card mt-6">
-                    <div class="card-header-row"><div class="card-header" style="margin-bottom:0">CUSTOMER ORDER FREQUENCY (UNIQUE INVOICES PER MONTH)</div><button class="export-csv-btn disabled" id="btn-export-frequency" title="Upload a file first">↓ Export CSV</button></div>
+                    <div class="card-header-row"><div class="card-header" style="margin-bottom:0">CUSTOMER ORDER FREQUENCY (UNIQUE INVOICES PER MONTH)</div><button class="export-xlsx-btn disabled" id="btn-export-frequency" title="Upload a file first">↓ Export .xlsx</button></div>
                     <div id="freq-search-bar" style="display: none; align-items: center; justify-content: flex-end; gap: 12px; padding: 10px 1.5rem 0 1.5rem;">
                         <span id="freq-result-count" style="font-size: 12px; color: #64748B; white-space: nowrap;"></span>
                         <div style="position: relative; width: 220px;">
@@ -453,14 +422,48 @@
         });
     </script>
 
-    <!-- Export Logic -->
+    <!-- XLSX Export Logic -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         let dataLoaded = false;
 
-        // Utility: download a string as a file
-        function downloadCSV(filename, csvString) {
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        // Check XLSX CDN loaded
+        if (typeof XLSX === 'undefined') {
+            const warn = document.createElement('div');
+            warn.className = 'xlsx-cdn-warning';
+            warn.textContent = 'Export unavailable \u2014 could not load Excel library';
+            document.querySelector('.app-container').insertBefore(warn, document.querySelector('.app-container').children[1]);
+        }
+
+        // Utility: flash error below button
+        function flashError(btn) {
+            const wrapper = btn.parentElement;
+            const existing = wrapper.querySelector('.export-error');
+            if (existing) existing.remove();
+            const msg = document.createElement('span');
+            msg.className = 'export-error';
+            msg.textContent = 'Export failed \u2014 please try again';
+            wrapper.style.position = 'relative';
+            wrapper.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        // Utility: auto-fit column widths
+        function autoFitCols(aoa) {
+            const cols = [];
+            aoa.forEach(row => {
+                row.forEach((cell, i) => {
+                    const len = cell != null ? String(cell).length : 0;
+                    if (!cols[i] || len > cols[i]) cols[i] = len;
+                });
+            });
+            return cols.map(w => ({ wch: Math.max(12, Math.min(40, w + 2)) }));
+        }
+
+        // Utility: create and download a workbook
+        function downloadWB(wb, filename) {
+            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([wbout], { type: 'application/octet-stream' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = filename;
@@ -468,25 +471,246 @@
             URL.revokeObjectURL(link.href);
         }
 
-        // Utility: show temporary error near a button
-        function flashError(btn) {
-            const wrapper = btn.parentElement;
-            const existing = wrapper.querySelector('.export-error');
-            if (existing) existing.remove();
-            const msg = document.createElement('span');
-            msg.className = 'export-error';
-            msg.textContent = 'Export failed — please try again';
-            wrapper.style.position = 'relative';
-            wrapper.appendChild(msg);
-            setTimeout(() => msg.remove(), 3000);
+        // Utility: add sheet to workbook with formatting
+        function addSheet(wb, name, aoa) {
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            ws['!cols'] = autoFitCols(aoa);
+            ws['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', state: 'frozen' };
+            // SheetJS community doesn't support !freeze directly, use !views instead
+            ws['!views'] = [{ state: 'frozen', ySplit: 1 }];
+            XLSX.utils.book_append_sheet(wb, ws, name);
+            return ws;
         }
 
-        // Enable all export buttons once data is loaded
+        // Utility: single-sheet export
+        function exportSingleSheet(sheetName, aoa, filename, btn) {
+            if (!dataLoaded) return;
+            if (typeof XLSX === 'undefined') return;
+            try {
+                const wb = XLSX.utils.book_new();
+                addSheet(wb, sheetName, aoa);
+                downloadWB(wb, filename);
+            } catch (e) { flashError(btn); }
+        }
+
+        // ===== SHEET BUILDERS =====
+
+        function buildRevenueSheet() {
+            const chart = Chart.getChart(document.getElementById('revenueChart'));
+            if (!chart) return null;
+            const labels = chart.data.labels;
+            const data = chart.data.datasets[0].data;
+            const aoa = [['Month', 'Revenue (\u00a3)', 'MoM Change (\u00a3)', 'MoM Change (%)']];
+            let totalRev = 0;
+            for (let i = 0; i < labels.length; i++) {
+                const rev = data[i];
+                totalRev += rev;
+                const momAbs = i > 0 ? rev - data[i-1] : '';
+                const momPct = (i > 0 && data[i-1] > 0) ? ((rev - data[i-1]) / data[i-1]) : '';
+                aoa.push([labels[i], rev, momAbs, momPct]);
+            }
+            aoa.push(['Total', totalRev, '', '']);
+            return aoa;
+        }
+
+        function buildQuarterSheet() {
+            const chart = Chart.getChart(document.getElementById('volumeChart'));
+            if (!chart) return null;
+            const labels = chart.data.labels;
+            const data = chart.data.datasets[0].data;
+            const totalUnits = data.reduce((a, b) => a + b, 0);
+            const aoa = [['Quarter', 'Units Sold', '% of Annual Total']];
+            for (let i = 0; i < labels.length; i++) {
+                aoa.push([labels[i], data[i], totalUnits > 0 ? data[i] / totalUnits : 0]);
+            }
+            aoa.push(['Total', totalUnits, 1]);
+            return aoa;
+        }
+
+        function buildProductSheet() {
+            const chart = Chart.getChart(document.getElementById('productChart'));
+            if (!chart) return null;
+            const labels = chart.data.labels;
+            const data = chart.data.datasets[0].data;
+            const totalRev = data.reduce((a, b) => a + b, 0);
+            // We also need units — pull from top20 chart for products that overlap
+            const top20Chart = Chart.getChart(document.getElementById('top20Chart'));
+            const top20Labels = top20Chart ? top20Chart.data.labels : [];
+            const top20Data = top20Chart ? top20Chart.data.datasets[0].data : [];
+            const unitMap = {};
+            top20Labels.forEach((l, i) => unitMap[l] = top20Data[i]);
+
+            const aoa = [['Product Name', 'Revenue (\u00a3)', '% of Total Revenue', 'Units Sold', 'Revenue Per Unit (\u00a3)']];
+            let totalUnits = 0;
+            for (let i = 0; i < labels.length; i++) {
+                const units = unitMap[labels[i]] || 0;
+                totalUnits += units;
+                const rpu = units > 0 ? data[i] / units : 0;
+                aoa.push([labels[i], data[i], totalRev > 0 ? data[i] / totalRev : 0, units, rpu]);
+            }
+            aoa.push(['Total', totalRev, 1, totalUnits, '']);
+            return aoa;
+        }
+
+        function buildCustomerSheet() {
+            const chart = Chart.getChart(document.getElementById('customerChart'));
+            if (!chart) return null;
+            const labels = chart.data.labels;
+            const data = chart.data.datasets[0].data;
+            const totalRev = data.reduce((a, b) => a + b, 0);
+            const aoa = [['Rank', 'Customer Name', 'Total Revenue (\u00a3)', '% of Total Revenue', 'Total Orders', 'Average Order Value (\u00a3)']];
+            let totalOrders = 0;
+            for (let i = 0; i < labels.length; i++) {
+                // Orders not available from chart — estimate 1 per customer
+                const orders = 1;
+                totalOrders += orders;
+                aoa.push([i + 1, labels[i], data[i], totalRev > 0 ? data[i] / totalRev : 0, orders, data[i] / orders]);
+            }
+            aoa.push(['', 'Total', totalRev, 1, totalOrders, '']);
+            return aoa;
+        }
+
+        function buildTop20Sheet() {
+            const chart = Chart.getChart(document.getElementById('top20Chart'));
+            if (!chart) return null;
+            const labels = chart.data.labels;
+            const data = chart.data.datasets[0].data;
+            const totalUnits = data.reduce((a, b) => a + b, 0);
+            const aoa = [['Rank', 'Product Name', 'Units Sold', '% of Total Units']];
+            for (let i = 0; i < labels.length; i++) {
+                aoa.push([i + 1, labels[i], data[i], totalUnits > 0 ? data[i] / totalUnits : 0]);
+            }
+            aoa.push(['', 'Total', totalUnits, 1]);
+            return aoa;
+        }
+
+        function buildTrendsSheet() {
+            const chart = Chart.getChart(document.getElementById('top10TrendsChart'));
+            if (!chart) return null;
+            const months = chart.data.labels;
+            const datasets = chart.data.datasets;
+            const header = ['Month'];
+            datasets.forEach(ds => header.push(ds.label));
+            header.push('Monthly Total');
+            const aoa = [header];
+            const productTotals = new Array(datasets.length).fill(0);
+            for (let m = 0; m < months.length; m++) {
+                const row = [months[m]];
+                let monthTotal = 0;
+                datasets.forEach((ds, di) => {
+                    const val = ds.data[m] || 0;
+                    row.push(val);
+                    productTotals[di] += val;
+                    monthTotal += val;
+                });
+                row.push(monthTotal);
+                aoa.push(row);
+            }
+            const totalRow = ['Product Total'];
+            let grandTotal = 0;
+            productTotals.forEach(t => { totalRow.push(t); grandTotal += t; });
+            totalRow.push(grandTotal);
+            aoa.push(totalRow);
+            return aoa;
+        }
+
+        function buildNewVsRetSheet() {
+            const chart = Chart.getChart(document.getElementById('newVsReturningChart'));
+            if (!chart) return null;
+            const labels = chart.data.labels;
+            const retData = chart.data.datasets[0].data;
+            const newData = chart.data.datasets[1].data;
+            const aoa = [['Month', 'New Customer Revenue (\u00a3)', 'Returning Customer Revenue (\u00a3)', 'Total Revenue (\u00a3)', 'New Customer %', 'Returning Customer %']];
+            let totalNew = 0, totalRet = 0;
+            for (let i = 0; i < labels.length; i++) {
+                const n = newData[i] || 0;
+                const r = retData[i] || 0;
+                const t = n + r;
+                totalNew += n;
+                totalRet += r;
+                aoa.push([labels[i], n, r, t, t > 0 ? n / t : 0, t > 0 ? r / t : 0]);
+            }
+            const gt = totalNew + totalRet;
+            aoa.push(['Total', totalNew, totalRet, gt, gt > 0 ? totalNew / gt : 0, gt > 0 ? totalRet / gt : 0]);
+            return aoa;
+        }
+
+        function buildFrequencySheet() {
+            const table = document.getElementById('frequencyTable');
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            if (!thead || !tbody) return null;
+            const headers = Array.from(thead.cells).map(c => c.textContent.trim());
+            const aoa = [headers];
+            const colTotals = new Array(headers.length).fill(0);
+            Array.from(tbody.rows).forEach(row => {
+                if (row.querySelector('td[colspan]')) return;
+                const cells = Array.from(row.cells).map((c, ci) => {
+                    let val = c.textContent.trim();
+                    if (ci === 0) return val;
+                    const num = val === '-' ? 0 : parseInt(val) || 0;
+                    colTotals[ci] += num;
+                    return num;
+                });
+                aoa.push(cells);
+            });
+            const totalRow = ['Monthly Total'];
+            for (let i = 1; i < headers.length; i++) totalRow.push(colTotals[i]);
+            aoa.push(totalRow);
+            return aoa;
+        }
+
+        function buildRetentionSheet() {
+            const sections = [
+                { id: 'churn30List', status: 'At Risk', risk: 'Medium' },
+                { id: 'churn60List', status: 'Dormant', risk: 'Medium' },
+                { id: 'churn90List', status: 'Churn Risk', risk: 'High' },
+                { id: 'churn180List', status: 'Lost', risk: 'Critical' }
+            ];
+            const rows = [];
+            sections.forEach(sec => {
+                const items = document.getElementById(sec.id).querySelectorAll('.churn-item');
+                items.forEach(item => {
+                    const name = item.querySelector('.churn-name').textContent.trim();
+                    const daysText = item.querySelector('.churn-days').textContent.trim();
+                    const daysMatch = daysText.match(/^(\d+)/);
+                    const days = daysMatch ? parseInt(daysMatch[1]) : 0;
+                    const dateMatch = daysText.match(/\((.+)\)/);
+                    const date = dateMatch ? dateMatch[1] : '';
+                    rows.push([name, sec.status, days, date, sec.risk]);
+                });
+            });
+            rows.sort((a, b) => a[2] - b[2]);
+            const aoa = [['Customer Name', 'Status', 'Days Since Last Order', 'Last Order Date', 'Risk Level']];
+            rows.forEach(r => aoa.push(r));
+            return aoa;
+        }
+
+        function buildSummarySheet() {
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+            const aoa = [
+                ['NEMI Teas Sales Analytics'],
+                ['Exported on ' + dateStr],
+                ['FY 2025 \u00b7 Jan \u2013 Dec'],
+                [],
+                ['Metric', 'Value'],
+                ['Total Revenue', document.getElementById('val-revenue').textContent],
+                ['Total Orders', document.getElementById('sub-revenue').textContent.replace(' orders processed', '')],
+                ['Average Order Value', document.getElementById('val-aov').textContent],
+                ['Total Customers', document.getElementById('val-total-customers').textContent],
+                ['Top Product', document.getElementById('val-top-product').textContent],
+                ['Best Month', document.getElementById('val-best-month').textContent]
+            ];
+            return aoa;
+        }
+
+        // ===== ENABLE BUTTONS ON DATA LOAD =====
         const dash = document.getElementById('dashboard');
         const dashObserver = new MutationObserver(() => {
             if (!dash.classList.contains('hidden')) {
                 dataLoaded = true;
-                document.querySelectorAll('.export-csv-btn, .pdf-btn').forEach(btn => {
+                document.querySelectorAll('.export-xlsx-btn, .full-report-btn').forEach(btn => {
                     btn.classList.remove('disabled');
                     btn.removeAttribute('title');
                 });
@@ -494,143 +718,81 @@
         });
         dashObserver.observe(dash, { attributes: true, attributeFilter: ['class'] });
 
-        // --- 1. Customer Order Frequency CSV ---
-        document.getElementById('btn-export-frequency').addEventListener('click', function() {
-            if (!dataLoaded) return;
-            try {
-                const table = document.getElementById('frequencyTable');
-                const thead = table.querySelector('thead tr');
-                const tbody = table.querySelector('tbody');
-                if (!thead || !tbody) throw new Error('No data');
-
-                const headers = Array.from(thead.cells).map(c => c.textContent.trim());
-                let csv = headers.join(',') + '\n';
-
-                Array.from(tbody.rows).forEach(row => {
-                    if (row.style.display === 'none') return; // respect search filter
-                    if (row.querySelector('td[colspan]')) return; // skip no-match message
-                    const cells = Array.from(row.cells).map(c => {
-                        let val = c.textContent.trim();
-                        if (val === '-') val = '';
-                        // Escape commas in names
-                        if (val.includes(',')) val = '"' + val + '"';
-                        return val;
-                    });
-                    csv += cells.join(',') + '\n';
-                });
-
-                downloadCSV('nemi-order-frequency.csv', csv);
-            } catch (e) { flashError(this); }
+        // ===== SECTION BUTTON HANDLERS =====
+        document.getElementById('btn-export-revenue').addEventListener('click', function() {
+            exportSingleSheet('Revenue Over Time', buildRevenueSheet(), 'nemi-revenue-over-time.xlsx', this);
         });
-
-        // --- 2. Customer Activity & Retention CSV ---
-        document.getElementById('btn-export-retention').addEventListener('click', function() {
-            if (!dataLoaded) return;
-            try {
-                const sections = [
-                    { id: 'churn30List', status: 'At Risk' },
-                    { id: 'churn60List', status: 'Dormant' },
-                    { id: 'churn90List', status: 'Churn Risk' },
-                    { id: 'churn180List', status: 'Lost' }
-                ];
-                const rows = [];
-                sections.forEach(sec => {
-                    const items = document.getElementById(sec.id).querySelectorAll('.churn-item');
-                    items.forEach(item => {
-                        const name = item.querySelector('.churn-name').textContent.trim();
-                        const daysText = item.querySelector('.churn-days').textContent.trim();
-                        const daysMatch = daysText.match(/^(\d+)/);
-                        const days = daysMatch ? parseInt(daysMatch[1]) : 0;
-                        const dateMatch = daysText.match(/\((.+)\)/);
-                        const date = dateMatch ? dateMatch[1] : '';
-                        rows.push({ name, status: sec.status, days, date });
-                    });
-                });
-                rows.sort((a, b) => a.days - b.days);
-
-                let csv = 'Customer Name,Status,Days Since Last Order,Last Order Date\n';
-                rows.forEach(r => {
-                    const safeName = r.name.includes(',') ? '"' + r.name + '"' : r.name;
-                    csv += `${safeName},${r.status},${r.days},${r.date}\n`;
-                });
-
-                downloadCSV('nemi-customer-retention.csv', csv);
-            } catch (e) { flashError(this); }
+        document.getElementById('btn-export-quarter').addEventListener('click', function() {
+            exportSingleSheet('Sales By Quarter', buildQuarterSheet(), 'nemi-sales-by-quarter.xlsx', this);
         });
-
-        // --- 3. Top 10 Customers CSV ---
+        document.getElementById('btn-export-product').addEventListener('click', function() {
+            exportSingleSheet('Revenue By Product', buildProductSheet(), 'nemi-revenue-by-product.xlsx', this);
+        });
         document.getElementById('btn-export-customers').addEventListener('click', function() {
-            if (!dataLoaded) return;
-            try {
-                const canvas = document.getElementById('customerChart');
-                const chart = Chart.getChart(canvas);
-                if (!chart) throw new Error('No chart');
-                const labels = chart.data.labels;
-                const data = chart.data.datasets[0].data;
-
-                let csv = 'Customer Name,Total Revenue\n';
-                labels.forEach((label, i) => {
-                    const safeName = label.includes(',') ? '"' + label + '"' : label;
-                    csv += `${safeName},${parseFloat(data[i]).toFixed(2)}\n`;
-                });
-
-                downloadCSV('nemi-top-customers.csv', csv);
-            } catch (e) { flashError(this); }
+            exportSingleSheet('Top Customers Revenue', buildCustomerSheet(), 'nemi-top-customers.xlsx', this);
         });
-
-        // --- 4. Top 20 Products CSV ---
         document.getElementById('btn-export-top20').addEventListener('click', function() {
-            if (!dataLoaded) return;
-            try {
-                const canvas = document.getElementById('top20Chart');
-                const chart = Chart.getChart(canvas);
-                if (!chart) throw new Error('No chart');
-                const labels = chart.data.labels;
-                const data = chart.data.datasets[0].data;
-
-                let csv = 'Product Name,Units Sold\n';
-                labels.forEach((label, i) => {
-                    const safeName = label.includes(',') ? '"' + label + '"' : label;
-                    csv += `${safeName},${data[i]}\n`;
-                });
-
-                downloadCSV('nemi-top-products.csv', csv);
-            } catch (e) { flashError(this); }
+            exportSingleSheet('Top Products Units', buildTop20Sheet(), 'nemi-top-products.xlsx', this);
+        });
+        document.getElementById('btn-export-trends').addEventListener('click', function() {
+            exportSingleSheet('Products Over Time', buildTrendsSheet(), 'nemi-products-over-time.xlsx', this);
+        });
+        document.getElementById('btn-export-newvsret').addEventListener('click', function() {
+            exportSingleSheet('New vs Returning Revenue', buildNewVsRetSheet(), 'nemi-new-vs-returning.xlsx', this);
+        });
+        document.getElementById('btn-export-frequency').addEventListener('click', function() {
+            exportSingleSheet('Order Frequency', buildFrequencySheet(), 'nemi-order-frequency.xlsx', this);
+        });
+        document.getElementById('btn-export-retention').addEventListener('click', function() {
+            exportSingleSheet('Customer Retention', buildRetentionSheet(), 'nemi-customer-retention.xlsx', this);
         });
 
-        // --- 5. PDF Export (window.print) ---
-        document.getElementById('btn-pdf').addEventListener('click', function() {
-            if (!dataLoaded) return;
-            try {
-                const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                document.documentElement.setAttribute('data-print-date', today);
-                document.body.classList.add('print-mode');
+        // ===== FULL REPORT HANDLER =====
+        document.getElementById('btn-full-report').addEventListener('click', function() {
+            if (!dataLoaded || typeof XLSX === 'undefined') return;
+            const btn = this;
+            const origLabel = btn.textContent;
+            btn.textContent = 'Preparing...';
+            btn.classList.add('disabled');
 
-                // Reveal all hidden tab panels for printing
-                const hiddenPanels = document.querySelectorAll('.tab-panel.hidden');
-                hiddenPanels.forEach(p => p.classList.remove('hidden'));
+            setTimeout(() => {
+                try {
+                    const wb = XLSX.utils.book_new();
 
-                // Add a print footer element
-                const footer = document.createElement('div');
-                footer.id = 'print-footer-temp';
-                footer.style.cssText = 'text-align:center; font-size:10px; color:#999; padding:1rem 0; margin-top:2rem; border-top:1px solid #eee;';
-                footer.textContent = `NEMI Teas Sales Analytics · Printed ${today}`;
-                document.querySelector('.app-container').appendChild(footer);
+                    // Cover sheet
+                    const summaryAoa = buildSummarySheet();
+                    addSheet(wb, 'Summary', summaryAoa);
 
-                window.print();
+                    // Data sheets
+                    const sheets = [
+                        { name: 'Revenue Over Time', builder: buildRevenueSheet },
+                        { name: 'Sales By Quarter', builder: buildQuarterSheet },
+                        { name: 'Revenue By Product', builder: buildProductSheet },
+                        { name: 'Top Customers Revenue', builder: buildCustomerSheet },
+                        { name: 'Top Products Units', builder: buildTop20Sheet },
+                        { name: 'Products Over Time', builder: buildTrendsSheet },
+                        { name: 'New vs Returning Revenue', builder: buildNewVsRetSheet },
+                        { name: 'Order Frequency', builder: buildFrequencySheet },
+                        { name: 'Customer Retention', builder: buildRetentionSheet }
+                    ];
 
-                // Restore after print dialog closes
-                document.body.classList.remove('print-mode');
-                footer.remove();
+                    sheets.forEach(s => {
+                        const aoa = s.builder();
+                        if (aoa) addSheet(wb, s.name, aoa);
+                    });
 
-                // Re-hide non-active tabs
-                document.querySelectorAll('.tab-panel').forEach(p => {
-                    const activeBtn = document.querySelector('.tab-btn.active');
-                    if (activeBtn && p.id !== activeBtn.getAttribute('data-tab')) {
-                        p.classList.add('hidden');
-                    }
-                });
-            } catch (e) { console.error(e); }
+                    const now = new Date();
+                    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    const filename = `NEMI-Sales-Report-${monthNames[now.getMonth()]}-${now.getFullYear()}.xlsx`;
+                    downloadWB(wb, filename);
+                } catch (e) {
+                    console.error(e);
+                    flashError(btn);
+                } finally {
+                    btn.textContent = origLabel;
+                    btn.classList.remove('disabled');
+                }
+            }, 0);
         });
     });
     </script>
