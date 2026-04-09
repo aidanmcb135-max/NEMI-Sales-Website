@@ -473,12 +473,13 @@
 
         // Utility: add sheet to workbook with formatting
         function addSheet(wb, name, aoa) {
+            // SheetJS limits sheet names to 31 characters
+            const safeName = name.substring(0, 31);
             const ws = XLSX.utils.aoa_to_sheet(aoa);
             ws['!cols'] = autoFitCols(aoa);
+            // Freeze top row using the correct SheetJS pane syntax
             ws['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', state: 'frozen' };
-            // SheetJS community doesn't support !freeze directly, use !views instead
-            ws['!views'] = [{ state: 'frozen', ySplit: 1 }];
-            XLSX.utils.book_append_sheet(wb, ws, name);
+            XLSX.utils.book_append_sheet(wb, ws, safeName);
             return ws;
         }
 
@@ -487,10 +488,14 @@
             if (!dataLoaded) return;
             if (typeof XLSX === 'undefined') return;
             try {
+                if (!aoa) throw new Error('No data available');
                 const wb = XLSX.utils.book_new();
                 addSheet(wb, sheetName, aoa);
                 downloadWB(wb, filename);
-            } catch (e) { flashError(btn); }
+            } catch (e) {
+                console.error('Single sheet export failed:', e);
+                flashError(btn);
+            }
         }
 
         // ===== SHEET BUILDERS =====
@@ -533,7 +538,6 @@
             const labels = chart.data.labels;
             const data = chart.data.datasets[0].data;
             const totalRev = data.reduce((a, b) => a + b, 0);
-            // We also need units — pull from top20 chart for products that overlap
             const top20Chart = Chart.getChart(document.getElementById('top20Chart'));
             const top20Labels = top20Chart ? top20Chart.data.labels : [];
             const top20Data = top20Chart ? top20Chart.data.datasets[0].data : [];
@@ -561,7 +565,6 @@
             const aoa = [['Rank', 'Customer Name', 'Total Revenue (\u00a3)', '% of Total Revenue', 'Total Orders', 'Average Order Value (\u00a3)']];
             let totalOrders = 0;
             for (let i = 0; i < labels.length; i++) {
-                // Orders not available from chart — estimate 1 per customer
                 const orders = 1;
                 totalOrders += orders;
                 aoa.push([i + 1, labels[i], data[i], totalRev > 0 ? data[i] / totalRev : 0, orders, data[i] / orders]);
@@ -669,10 +672,14 @@
             ];
             const rows = [];
             sections.forEach(sec => {
-                const items = document.getElementById(sec.id).querySelectorAll('.churn-item');
+                const container = document.getElementById(sec.id);
+                if (!container) return;
+                const items = container.querySelectorAll('.churn-item');
                 items.forEach(item => {
-                    const name = item.querySelector('.churn-name').textContent.trim();
-                    const daysText = item.querySelector('.churn-days').textContent.trim();
+                    const nameEl = item.querySelector('.churn-name');
+                    const daysEl = item.querySelector('.churn-days');
+                    const name = nameEl ? nameEl.textContent.trim() : 'Unknown';
+                    const daysText = daysEl ? daysEl.textContent.trim() : '';
                     const daysMatch = daysText.match(/^(\d+)/);
                     const days = daysMatch ? parseInt(daysMatch[1]) : 0;
                     const dateMatch = daysText.match(/\((.+)\)/);
@@ -689,18 +696,27 @@
         function buildSummarySheet() {
             const today = new Date();
             const dateStr = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            // Safely read each KPI value with fallbacks
+            const safeText = (id) => {
+                const el = document.getElementById(id);
+                return el ? el.textContent.trim() || 'N/A' : 'N/A';
+            };
+
+            const totalOrders = safeText('sub-revenue').replace(' orders processed', '');
+
             const aoa = [
                 ['NEMI Teas Sales Analytics'],
                 ['Exported on ' + dateStr],
                 ['FY 2025 \u00b7 Jan \u2013 Dec'],
-                [],
+                [''],
                 ['Metric', 'Value'],
-                ['Total Revenue', document.getElementById('val-revenue').textContent],
-                ['Total Orders', document.getElementById('sub-revenue').textContent.replace(' orders processed', '')],
-                ['Average Order Value', document.getElementById('val-aov').textContent],
-                ['Total Customers', document.getElementById('val-total-customers').textContent],
-                ['Top Product', document.getElementById('val-top-product').textContent],
-                ['Best Month', document.getElementById('val-best-month').textContent]
+                ['Total Revenue', safeText('val-revenue')],
+                ['Total Orders', totalOrders],
+                ['Average Order Value', safeText('val-aov')],
+                ['Total Customers', safeText('val-total-customers')],
+                ['Top Product', safeText('val-top-product')],
+                ['Best Month', safeText('val-best-month')]
             ];
             return aoa;
         }
@@ -758,12 +774,16 @@
             setTimeout(() => {
                 try {
                     const wb = XLSX.utils.book_new();
+                    let sheetCount = 0;
 
-                    // Cover sheet
+                    // 1. Cover sheet first
                     const summaryAoa = buildSummarySheet();
-                    addSheet(wb, 'Summary', summaryAoa);
+                    if (summaryAoa) {
+                        addSheet(wb, 'Summary', summaryAoa);
+                        sheetCount++;
+                    }
 
-                    // Data sheets
+                    // 2. Data sheets in order
                     const sheets = [
                         { name: 'Revenue Over Time', builder: buildRevenueSheet },
                         { name: 'Sales By Quarter', builder: buildQuarterSheet },
@@ -777,16 +797,25 @@
                     ];
 
                     sheets.forEach(s => {
-                        const aoa = s.builder();
-                        if (aoa) addSheet(wb, s.name, aoa);
+                        try {
+                            const aoa = s.builder();
+                            if (aoa && aoa.length > 0) {
+                                addSheet(wb, s.name, aoa);
+                                sheetCount++;
+                            }
+                        } catch (sheetErr) {
+                            console.error('Failed to build sheet: ' + s.name, sheetErr);
+                        }
                     });
+
+                    if (sheetCount === 0) throw new Error('No sheets could be built');
 
                     const now = new Date();
                     const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                    const filename = `NEMI-Sales-Report-${monthNames[now.getMonth()]}-${now.getFullYear()}.xlsx`;
+                    const filename = 'NEMI-Sales-Report-' + monthNames[now.getMonth()] + '-' + now.getFullYear() + '.xlsx';
                     downloadWB(wb, filename);
                 } catch (e) {
-                    console.error(e);
+                    console.error('Full report export failed:', e);
                     flashError(btn);
                 } finally {
                     btn.textContent = origLabel;
