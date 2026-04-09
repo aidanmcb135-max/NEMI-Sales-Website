@@ -1,11 +1,11 @@
 :root {
-    --bg-color: #F8FAF9;
+    --bg-color: #F4F7F8;
     --card-bg: #FFFFFF;
-    --card-border: #E5E7EB;
-    --text-primary: #111827;
-    --text-secondary: #6B7280;
-    --accent: #2c6e49;
-    --accent-light: #e6f0eb;
+    --card-border: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-secondary: #64748B;
+    --accent: #0F2C41;
+    --accent-light: #E2E8F0;
     --success: #10b981;
 }
 
@@ -16,7 +16,7 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-primary);
     min-height: 100vh;
@@ -246,7 +246,7 @@ body {
     color: var(--text-primary);
     margin: 2.5rem 0 1rem 0;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid var(--brand-green);
+    border-bottom: 2px solid var(--accent);
 }
 
 /* --- V2: Tall Chart Containers --- */
@@ -408,8 +408,8 @@ body {
 
 .freq-table .total-col {
     font-weight: 700;
-    color: var(--brand-green);
-    background: #F0FDF4 !important;
+    color: var(--accent);
+    background: var(--accent-light) !important;
 }
 
 .freq-table .cell-zero { color: #D1D5DB; }

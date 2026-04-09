@@ -11,8 +11,8 @@ class ChartManager {
         this.top10TrendsChart = null;
 
         // Setup Chart.js global defaults for Base44 light theme
-        Chart.defaults.color = '#6B7280';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748B';
+        Chart.defaults.font.family = "'Montserrat', sans-serif";
         Chart.defaults.plugins.tooltip.backgroundColor = '#FFFFFF';
         Chart.defaults.plugins.tooltip.titleColor = '#111827';
         Chart.defaults.plugins.tooltip.bodyColor = '#4B5563';
@@ -31,8 +31,8 @@ class ChartManager {
         if (this.revenueChart) this.revenueChart.destroy();
 
         const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(44, 110, 73, 0.2)');
-        gradient.addColorStop(1, 'rgba(44, 110, 73, 0.0)');
+        gradient.addColorStop(0, 'rgba(15, 44, 65, 0.2)');
+        gradient.addColorStop(1, 'rgba(15, 44, 65, 0.0)');
 
         this.revenueChart = new Chart(ctx, {
             type: 'line',
@@ -41,11 +41,11 @@ class ChartManager {
                 datasets: [{
                     label: 'Revenue',
                     data: data,
-                    borderColor: '#2c6e49',
+                    borderColor: '#0F2C41',
                     backgroundColor: gradient,
                     borderWidth: 2,
                     pointBackgroundColor: '#FFFFFF',
-                    pointBorderColor: '#2c6e49',
+                    pointBorderColor: '#0F2C41',
                     pointBorderWidth: 2,
                     pointRadius: 4,
                     pointHoverRadius: 6,
@@ -90,7 +90,7 @@ class ChartManager {
                 datasets: [{
                     label: 'Sales Volume',
                     data: data,
-                    backgroundColor: '#3b8258',
+                    backgroundColor: '#1E496B',
                     borderRadius: 4
                 }]
             },
@@ -124,7 +124,7 @@ class ChartManager {
                 datasets: [{
                     label: 'Revenue',
                     data: data,
-                    backgroundColor: '#3b8258',
+                    backgroundColor: '#1E496B',
                     borderRadius: 4,
                     barThickness: 'flex',
                     maxBarThickness: 24
@@ -149,7 +149,7 @@ class ChartManager {
     renderProductChart(productData) {
         const ctx = document.getElementById('productChart').getContext('2d');
 
-        const palette = ['#215237', '#2c6e49', '#3b8258', '#4c9568', '#60a97a', '#77bc8d', '#90cfa2', '#aee2b7', '#c9efd9'];
+        const palette = ['#081722', '#0F2C41', '#1A4261', '#245A84', '#3174A8', '#4B8DBF', '#6CA3CD', '#90BADA', '#B6D1E8'];
 
         let displayData = [];
         if (productData.length > 8) {
@@ -214,7 +214,7 @@ class ChartManager {
                 datasets: [{
                     label: 'Units Sold',
                     data: data,
-                    backgroundColor: '#4c9568',
+                    backgroundColor: '#245A84',
                     borderRadius: 4,
                     barThickness: 'flex',
                     maxBarThickness: 16
@@ -237,8 +237,8 @@ class ChartManager {
         const ctx = document.getElementById('top10TrendsChart').getContext('2d');
 
         const palette = [
-            '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-            '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+            '#081722', '#0F2C41', '#1A4261', '#245A84', '#3174A8',
+            '#4B8DBF', '#6CA3CD', '#90BADA', '#B6D1E8', '#10b981'
         ];
 
         // Apply colors and styling to datasets
