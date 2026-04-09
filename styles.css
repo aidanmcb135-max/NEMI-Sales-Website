@@ -1,0 +1,443 @@
+:root {
+    --bg-color: #F8FAF9;
+    --card-bg: #FFFFFF;
+    --card-border: #E5E7EB;
+    --text-primary: #111827;
+    --text-secondary: #6B7280;
+    --accent: #2c6e49;
+    --accent-light: #e6f0eb;
+    --success: #10b981;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* TOP NAV */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-box {
+    background: var(--accent);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-box svg {
+    width: 20px;
+    height: 20px;
+}
+
+.nav-titles h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.nav-titles span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.nav-fy {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* UPLOAD SECTION */
+.upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.dropzone {
+    background: var(--card-bg);
+    border: 2px dashed #D1D5DB;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dropzone:hover, .dropzone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+}
+
+.upload-icon {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* KPI CARDS */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.kpi-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.kpi-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.kpi-icon {
+    background: var(--accent-light);
+    color: var(--accent);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+}
+
+.kpi-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* CHARTS GRID */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.donut-container {
+    height: 300px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Utilities */
+.hidden { display: none !important; }
+.status-message { font-size: 0.9rem; margin-top: 1rem; color: var(--success); }
+
+/* Debug Log */
+.debug-log {
+    background: #1F2937;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 600px;
+    margin-top: 1rem;
+    padding: 1rem;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+.log-header { border-bottom: 1px solid #374151; padding-bottom: 0.5rem; margin-bottom: 0.5rem; color: #fff; }
+.log-content { max-height: 100px; overflow-y: auto; white-space: pre-wrap; }
+.log-entry.error { color: #ef4444; }
+.log-entry.success { color: #10b981; }
+.log-entry.info { color: #60a5fa; }
+
+/* --- V2: Section Dividers --- */
+.section-divider {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 2.5rem 0 1rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--brand-green);
+}
+
+/* --- V2: Tall Chart Containers --- */
+.chart-card-tall { min-height: 420px; }
+.chart-tall { height: 370px; }
+.mt-6 { margin-top: 1.5rem; }
+.full-width-card { width: 100%; }
+
+/* --- V2: Churn / Retention Grid --- */
+.tables-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.tables-grid-4 {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.churn-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+}
+
+.tables-grid .churn-card {
+    border-right: 1px solid var(--border-light);
+}
+
+.tables-grid .churn-card:last-child {
+    border-right: none;
+}
+
+.churn-header-info {
+    color: #2563EB !important;
+    background: #EFF6FF;
+    border-bottom: 1px solid #BFDBFE;
+}
+
+.churn-header-critical {
+    color: #DC2626 !important;
+    background: #FEF2F2;
+    border-bottom: 1px solid #FECACA;
+}
+
+.churn-header-lost {
+    color: #6B7280 !important;
+    background: #F3F4F6;
+    border-bottom: 1px solid #D1D5DB;
+}
+
+.churn-header-warning {
+    color: #D97706 !important;
+    background: #FFFBEB;
+    border-bottom: 1px solid #FDE68A;
+}
+
+.list-container {
+    padding: 0;
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+.churn-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.875rem;
+    transition: background 0.15s ease;
+}
+
+.churn-item:last-child { border-bottom: none; }
+.churn-item:hover { background: #F9FAFB; }
+
+.churn-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.churn-days {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.no-data-msg {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+/* --- V2: Frequency Table --- */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    padding: 0;
+}
+
+.freq-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.freq-table th {
+    padding: 0.75rem 0.75rem;
+    background: #F9FAFB;
+    border-bottom: 2px solid var(--border-light);
+    border-right: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.freq-table th:first-child {
+    text-align: left;
+    min-width: 180px;
+}
+
+.freq-table th:last-child { border-right: none; }
+
+.freq-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+    border-right: 1px solid var(--border-light);
+    color: var(--text-primary);
+}
+
+.freq-table td:first-child {
+    text-align: left;
+    background: #FAFBFC;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.freq-table td:last-child { border-right: none; }
+
+.freq-table tr:hover td { background: #F3F4F6; }
+.freq-table tr:hover td:first-child { background: #EFF0F2; }
+
+.freq-table .total-col {
+    font-weight: 700;
+    color: var(--brand-green);
+    background: #F0FDF4 !important;
+}
+
+.freq-table .cell-zero { color: #D1D5DB; }
+
+/* Frequency card structure */
+.full-width-card .card-header {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.full-width-card .table-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+    .tables-grid, .tables-grid-4 { grid-template-columns: 1fr 1fr; }
+    .tables-grid .churn-card {
+        border-right: none;
+        border-bottom: 1px solid var(--border-light);
+    }
+    .tables-grid .churn-card:last-child {
+        border-bottom: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .metrics-grid { grid-template-columns: 1fr; }
+    .nav-titles span { display: none; }
+}

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Analytics | NEMI Teas</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css?v=8">
+    <!-- Chart.js & SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="top-nav">
+            <div class="nav-left">
+                <div class="logo-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    </svg>
+                </div>
+                <div class="nav-titles">
+                    <h1>NEMI Teas</h1>
+                    <span>SALES ANALYTICS</span>
+                </div>
+            </div>
+            <div class="nav-right">
+                <span class="nav-fy">FY 2025</span>
+                <span class="nav-date">Jan – Dec</span>
+            </div>
+        </header>
+
+        <section class="upload-section" id="uploadSection">
+            <div id="dropzone" class="dropzone">
+                <div class="upload-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                    </svg>
+                </div>
+                <p>Upload your <strong>.xlsx</strong> file to view analytics</p>
+                <input type="file" id="fileInput" accept=".xlsx, .xls" hidden>
+            </div>
+            <div id="uploadStatus" class="status-message"></div>
+
+            <div id="debugLog" class="debug-log hidden">
+                <div class="log-header">Process Logs</div>
+                <div id="logContent" class="log-content"></div>
+            </div>
+        </section>
+
+        <section id="dashboard" class="dashboard-content hidden">
+            <!-- Summary Cards -->
+            <div class="metrics-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">TOTAL REVENUE</span>
+                        <div class="kpi-icon">£</div>
+                    </div>
+                    <div class="kpi-value" id="val-revenue">£0</div>
+                    <div class="kpi-subtitle" id="sub-revenue">0 orders processed</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">MOST PROFITABLE MONTH</span>
+                        <div class="kpi-icon">↗</div>
+                    </div>
+                    <div class="kpi-value" id="val-best-month">-</div>
+                    <div class="kpi-subtitle" id="sub-best-month">£0 revenue</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">TOP SELLING PRODUCT</span>
+                        <div class="kpi-icon">★</div>
+                    </div>
+                    <div class="kpi-value" id="val-top-product">-</div>
+                    <div class="kpi-subtitle" id="sub-top-product">0 units sold</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">TOTAL CUSTOMERS</span>
+                        <div class="kpi-icon">👥</div>
+                    </div>
+                    <div class="kpi-value" id="val-total-customers">0</div>
+                    <div class="kpi-subtitle">Active accounts</div>
+                </div>
+            </div>
+
+            <!-- Charts Section 1 -->
+            <div class="charts-grid top-charts">
+                <div class="chart-card">
+                    <div class="card-header">REVENUE OVER TIME</div>
+                    <div class="chart-container"><canvas id="revenueChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">SALES VOLUME BY QUARTER</div>
+                    <div class="chart-container"><canvas id="volumeChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Charts Section 2 -->
+            <div class="charts-grid bottom-charts">
+                <div class="chart-card">
+                    <div class="card-header">TOP 10 CUSTOMERS BY REVENUE</div>
+                    <div class="chart-container"><canvas id="customerChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">REVENUE BREAKDOWN BY PRODUCT</div>
+                    <div class="chart-container donut-container"><canvas id="productChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Enhanced Analytics Section -->
+            <h2 class="section-divider">Detailed Product Analytics</h2>
+
+            <div class="charts-grid top-charts">
+                <div class="chart-card chart-card-tall">
+                    <div class="card-header">TOP 20 PRODUCTS (BY UNITS SOLD)</div>
+                    <div class="chart-container chart-tall"><canvas id="top20Chart"></canvas></div>
+                </div>
+                <div class="chart-card chart-card-tall">
+                    <div class="card-header">TOP 10 PRODUCTS OVER TIME</div>
+                    <div class="chart-container chart-tall"><canvas id="top10TrendsChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Frequency & Churn Section -->
+            <h2 class="section-divider">Customer Activity & Retention</h2>
+
+            <div class="tables-grid tables-grid-4">
+                <!-- Churn Analysis -->
+                <div class="chart-card churn-card">
+                    <div class="card-header churn-header-info">AT RISK (30-59 DAYS)</div>
+                    <div class="list-container" id="churn30List">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="chart-card churn-card">
+                    <div class="card-header churn-header-warning">DORMANT (60-89 DAYS)</div>
+                    <div class="list-container" id="churn60List">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="chart-card churn-card">
+                    <div class="card-header churn-header-critical">CHURN RISK (90-180 DAYS)</div>
+                    <div class="list-container" id="churn90List">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="chart-card churn-card">
+                    <div class="card-header churn-header-lost">LOST (180+ DAYS)</div>
+                    <div class="list-container" id="churn180List">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card full-width-card mt-6">
+                <div class="card-header">CUSTOMER ORDER FREQUENCY (UNIQUE INVOICES PER MONTH)</div>
+                <div class="table-container">
+                    <table class="freq-table" id="frequencyTable">
+                        <!-- Populated by JS -->
+                    </table>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="data-loader.js?v=8"></script>
+    <script src="analyzer.js?v=8"></script>
+    <script src="charts.js?v=8"></script>
+    <script src="main.js?v=8"></script>
+</body>
+
+</html>
