@@ -60,7 +60,10 @@
             <div class="tabs-nav">
                 <button class="tab-btn active" data-tab="tab-overview">Overview</button>
                 <button class="tab-btn" data-tab="tab-products">Products</button>
-                <button class="tab-btn" data-tab="tab-customers">Customers</button>
+                <button class="tab-btn" data-tab="tab-customers" style="display: inline-flex; align-items: center;">
+                    Customers
+                    <span id="churn-badge" style="display: none; align-items: center; justify-content: center; height: 18px; font-size: 11px; font-weight: 500; color: #854F0B; background-color: #FAEEDA; border-radius: 99px; padding: 2px 7px; margin-left: 6px;">0</span>
+                </button>
             </div>
 
             <!-- TAB 1: OVERVIEW -->
@@ -234,6 +237,44 @@
     <script src="analyzer.js?v=11"></script>
     <script src="charts.js?v=11"></script>
     <script src="main.js?v=11"></script>
+    
+    <!-- Warning Indicator Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const updateCustomerBadge = () => {
+                const list30 = document.getElementById('churn30List');
+                const list60 = document.getElementById('churn60List');
+                const list90 = document.getElementById('churn90List');
+                
+                if (!list30 || !list60 || !list90) return;
+
+                // Sum items across the three specific columns (excludes the churned180 lost list)
+                const c30 = list30.querySelectorAll('.churn-item').length;
+                const c60 = list60.querySelectorAll('.churn-item').length;
+                const c90 = list90.querySelectorAll('.churn-item').length;
+                
+                const total = c30 + c60 + c90;
+                const badge = document.getElementById('churn-badge');
+                
+                if (badge) {
+                    if (total > 0) {
+                        badge.textContent = total;
+                        badge.style.display = 'inline-flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            };
+
+            // Calculate dynamically when the script updates the HTML in these containers
+            const observer = new MutationObserver(updateCustomerBadge);
+            const config = { childList: true, subtree: true };
+            
+            observer.observe(document.getElementById('churn30List'), config);
+            observer.observe(document.getElementById('churn60List'), config);
+            observer.observe(document.getElementById('churn90List'), config);
+        });
+    </script>
 </body>
 
 </html>
