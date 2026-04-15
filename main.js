@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const debugLog = document.getElementById('debugLog');
     const logContent = document.getElementById('logContent');
 
+    // Global state for date filtering
+    let _rawData = null;
+    let _chartManager = null;
+
     function log(message, type = 'info') {
         const entry = document.createElement('div');
         entry.className = `log-entry ${type}`;
@@ -88,16 +92,19 @@ document.addEventListener('DOMContentLoaded', () => {
         highlightTarget('section-customer-activity');
     });
 
-    // Header Click Navigation (Home)
+    // Header Click Navigation (Home) — stop propagation from date picker
     const mainHeader = document.querySelector('.top-nav');
     if (mainHeader) {
-        mainHeader.addEventListener('click', () => {
+        mainHeader.addEventListener('click', (e) => {
+            // Don't navigate if user clicked on date inputs or reset button
+            if (e.target.closest('#date-from') || e.target.closest('#date-to') || e.target.closest('#date-reset-btn')) return;
             switchTab('tab-overview');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
-    const chartManager = new ChartManager();
+    _chartManager = new ChartManager();
+    const chartManager = _chartManager;
 
     // Drag and drop setup
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => dropzone.addEventListener(eventName, preventDefaults, false));
@@ -136,29 +143,19 @@ document.addEventListener('DOMContentLoaded', () => {
             log(`Analyzing ${rawData.length} valid sales records...`, 'success');
             uploadStatus.textContent = `Successfully processed ${rawData.length} rows.`;
 
+            // Store raw data globally for date filtering
+            _rawData = rawData;
+
             const analyzer = new DataAnalyzer(rawData);
+
+            // Set date picker defaults from data range
+            setupDatePicker(rawData);
 
             // Hide Upload elements, reveal Dashboard properly
             document.getElementById('uploadSection').classList.add('hidden');
             document.getElementById('uploadHeader').classList.remove('hidden');
 
-            // 1. Dashboard Metrics
-            updateDashboardMetrics(analyzer);
-
-            // 2. Main Charts
-            chartManager.renderRevenueChart(analyzer.getRevenueByMonth());
-            chartManager.renderVolumeChart(analyzer.getVolumeByQuarter());
-            chartManager.renderCustomerChart(analyzer.getRevenueByCustomer());
-            chartManager.renderProductChart(analyzer.getRevenueByProduct());
-            chartManager.renderNewVsReturningChart(analyzer.getNewVsReturningMetrics());
-
-            // 3. Boss V2 Charts (rendered as standalone functions to avoid caching issues)
-            renderTop20Chart(analyzer.getTopProductsByQuantity(20));
-            renderTop10TrendsChart(analyzer.getTop10ProductTrends());
-
-            // 4. Tables and Lists
-            renderFrequencyTable(analyzer.getCustomerFrequencyTable());
-            renderChurnLists(analyzer.getChurnedCustomers());
+            renderAll(analyzer);
 
             dashboard.classList.remove('hidden');
             dashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -169,6 +166,26 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadStatus.textContent = `Error: ${error.message}`;
             uploadStatus.style.color = '#ef4444';
         }
+    }
+
+    function renderAll(analyzer) {
+            // 1. Dashboard Metrics
+            updateDashboardMetrics(analyzer);
+
+            // 2. Main Charts
+            chartManager.renderRevenueChart(analyzer.getRevenueByMonth());
+            chartManager.renderVolumeChart(analyzer.getVolumeByQuarter());
+            chartManager.renderCustomerChart(analyzer.getRevenueByCustomer());
+            chartManager.renderProductChart(analyzer.getRevenueByProduct());
+            chartManager.renderNewVsReturningChart(analyzer.getNewVsReturningMetrics());
+
+            // 3. Boss V2 Charts
+            renderTop20Chart(analyzer.getTopProductsByQuantity(20));
+            renderTop10TrendsChart(analyzer.getTop10ProductTrends());
+
+            // 4. Tables and Lists
+            renderFrequencyTable(analyzer.getCustomerFrequencyTable());
+            renderChurnLists(analyzer.getChurnedCustomers());
     }
 
     // ---- TOP 20 PRODUCTS CHART (standalone) ----
@@ -286,6 +303,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sub-top-product').textContent = `${(topProduct.quantity || 0).toLocaleString()} units sold`;
 
         document.getElementById('val-total-customers').textContent = analyzer.getTotalCustomers().toLocaleString();
+
+        // New metrics
+        const repeatRate = analyzer.getRepeatPurchaseRate();
+        document.getElementById('val-repeat-rate').textContent = Math.round(repeatRate * 100) + '%';
+
+        const avgDays = analyzer.getAvgDaysBetweenOrders();
+        document.getElementById('val-avg-days').textContent = avgDays > 0 ? avgDays + ' days' : '-';
     }
 
     function renderFrequencyTable(freqData) {
@@ -354,6 +378,72 @@ document.addEventListener('DOMContentLoaded', () => {
         churnData.churned180.forEach(c => {
             const dateStr = c.lastOrder.toLocaleDateString();
             list180.innerHTML += `<div class="churn-item"><span class="churn-name">${c.customer}</span><span class="churn-days">${c.daysSince} days (${dateStr})</span></div>`;
+        });
+    }
+
+    // ===== DATE RANGE PICKER =====
+    function setupDatePicker(rawData) {
+        // Find min and max dates from data
+        let minDate = new Date('9999-12-31');
+        let maxDate = new Date(0);
+        rawData.forEach(row => {
+            const d = row.transactionDate;
+            if (d instanceof Date && !isNaN(d.getTime())) {
+                if (d < minDate) minDate = d;
+                if (d > maxDate) maxDate = d;
+            }
+        });
+
+        const fromInput = document.getElementById('date-from');
+        const toInput = document.getElementById('date-to');
+        const resetBtn = document.getElementById('date-reset-btn');
+        const fyLabel = document.getElementById('nav-fy-label');
+
+        const toISO = (d) => d.toISOString().split('T')[0];
+
+        fromInput.value = toISO(minDate);
+        toInput.value = toISO(maxDate);
+        fromInput.min = toISO(minDate);
+        fromInput.max = toISO(maxDate);
+        toInput.min = toISO(minDate);
+        toInput.max = toISO(maxDate);
+
+        const updateFYLabel = () => {
+            const from = new Date(fromInput.value);
+            const to = new Date(toInput.value);
+            const opts = { month: 'short', year: 'numeric' };
+            fyLabel.textContent = from.toLocaleDateString('en-GB', opts) + ' – ' + to.toLocaleDateString('en-GB', opts);
+        };
+        updateFYLabel();
+
+        const applyFilter = () => {
+            if (!_rawData) return;
+            const from = new Date(fromInput.value + 'T00:00:00');
+            const to = new Date(toInput.value + 'T23:59:59');
+            const filtered = _rawData.filter(row => {
+                const d = row.transactionDate;
+                return d instanceof Date && !isNaN(d.getTime()) && d >= from && d <= to;
+            });
+            if (filtered.length === 0) return;
+            // Deep-clone rows so DataAnalyzer re-parses cleanly
+            const cloned = filtered.map(r => ({...r, transactionDate: new Date(r.transactionDate)}));
+            const analyzer = new DataAnalyzer(cloned);
+            renderAll(analyzer);
+            updateFYLabel();
+        };
+
+        fromInput.addEventListener('change', applyFilter);
+        toInput.addEventListener('change', applyFilter);
+        resetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fromInput.value = toISO(minDate);
+            toInput.value = toISO(maxDate);
+            applyFilter();
+        });
+
+        // Prevent clicks on inputs from triggering header navigation
+        [fromInput, toInput, resetBtn].forEach(el => {
+            el.addEventListener('click', (e) => e.stopPropagation());
         });
     }
 });
