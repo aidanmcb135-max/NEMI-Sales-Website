@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Analytics | NEMI Teas</title>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800&display=swap" rel="stylesheet">
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=11">
+    <link rel="stylesheet" href="styles.css?v=12">
     <!-- Chart.js & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -29,6 +29,7 @@
             background: #F4F7F8;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            color: #10b981;
         }
         .export-xlsx-btn.disabled { opacity: 0.4; cursor: not-allowed; }
         .export-xlsx-btn.disabled:hover { background: transparent; transform: none; box-shadow: none; }
@@ -63,6 +64,7 @@
             background: #F4F7F8;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            color: #10b981;
         }
         .full-report-btn.disabled { opacity: 0.4; cursor: not-allowed; }
         .full-report-btn.disabled:hover { background: transparent; transform: none; box-shadow: none; }
@@ -91,9 +93,12 @@
                     <span>SALES ANALYTICS</span>
                 </div>
             </div>
-            <div class="nav-right">
-                <span class="nav-fy">FY 2025</span>
-                <span class="nav-date">Jan – Dec</span>
+            <div class="nav-right" style="gap: 0.75rem;">
+                <span class="nav-fy" id="nav-fy-label">FY 2025</span>
+                <input type="date" id="date-from" style="font-family: 'Inter', sans-serif; font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); color: white; cursor: pointer;" title="From date">
+                <span style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">to</span>
+                <input type="date" id="date-to" style="font-family: 'Inter', sans-serif; font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); color: white; cursor: pointer;" title="To date">
+                <button id="date-reset-btn" style="font-family: 'Inter', sans-serif; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.15); color: white; cursor: pointer; font-weight: 600; transition: background 0.15s ease;" title="Reset to full range">Reset</button>
             </div>
         </header>
 
@@ -192,6 +197,20 @@
                     </div>
                     <div class="kpi-value" id="val-clv">£0</div>
                     <div class="kpi-subtitle">All-time per customer</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">REPEAT PURCHASE RATE</span>
+                    </div>
+                    <div class="kpi-value" id="val-repeat-rate">-</div>
+                    <div class="kpi-subtitle">of customers reordered</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">AVG DAYS BETWEEN ORDERS</span>
+                    </div>
+                    <div class="kpi-value" id="val-avg-days">-</div>
+                    <div class="kpi-subtitle">avg reorder cycle</div>
                 </div>
             </div>
 

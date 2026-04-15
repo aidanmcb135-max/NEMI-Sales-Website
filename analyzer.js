@@ -312,4 +312,52 @@ class DataAnalyzer {
              ]
         };
     }
+
+    getRepeatPurchaseRate() {
+        // Count unique invoices per customer
+        const customerInvoices = {};
+        this.data.forEach(row => {
+            const customer = row.customer || 'Unknown';
+            const invoice = row.invoiceNo;
+            if (!invoice || invoice === 'Unknown') return;
+            if (!customerInvoices[customer]) customerInvoices[customer] = new Set();
+            customerInvoices[customer].add(invoice);
+        });
+
+        const totalCustomers = Object.keys(customerInvoices).length;
+        if (totalCustomers === 0) return 0;
+
+        const repeatCustomers = Object.values(customerInvoices).filter(invoices => invoices.size > 1).length;
+        return repeatCustomers / totalCustomers;
+    }
+
+    getAvgDaysBetweenOrders() {
+        // Collect all valid order dates per customer
+        const customerDates = {};
+        this.data.forEach(row => {
+            const customer = row.customer || 'Unknown';
+            const d = row.transactionDate;
+            if (isNaN(d.getTime())) return;
+            if (!customerDates[customer]) customerDates[customer] = new Set();
+            // Use date string to get unique days only
+            customerDates[customer].add(d.toISOString().split('T')[0]);
+        });
+
+        const MS_PER_DAY = 1000 * 60 * 60 * 24;
+        let totalAvgGap = 0;
+        let customersWithMultiple = 0;
+
+        Object.values(customerDates).forEach(dateSet => {
+            if (dateSet.size < 2) return;
+            const sorted = Array.from(dateSet).sort().map(ds => new Date(ds));
+            let gapSum = 0;
+            for (let i = 1; i < sorted.length; i++) {
+                gapSum += (sorted[i] - sorted[i - 1]) / MS_PER_DAY;
+            }
+            totalAvgGap += gapSum / (sorted.length - 1);
+            customersWithMultiple++;
+        });
+
+        return customersWithMultiple > 0 ? Math.round(totalAvgGap / customersWithMultiple) : 0;
+    }
 }

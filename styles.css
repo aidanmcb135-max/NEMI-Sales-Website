@@ -1,5 +1,5 @@
 :root {
-    --bg-color: #F4F7F8;
+    --bg-color: #FAF9F7;
     --card-bg: #FFFFFF;
     --card-border: #E2E8F0;
     --text-primary: #0F172A;
@@ -7,6 +7,7 @@
     --accent: #0F2C41;
     --accent-light: #E2E8F0;
     --success: #10b981;
+    --brand-green: #10b981;
 }
 
 * {
@@ -16,7 +17,7 @@
 }
 
 body {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-primary);
     min-height: 100vh;
@@ -73,6 +74,7 @@ body {
 }
 
 .nav-titles h1 {
+    font-family: 'Playfair Display', serif;
     font-size: 1.3rem;
     font-weight: 800;
     color: white;
@@ -138,7 +140,7 @@ body {
 /* KPI CARDS */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -161,6 +163,7 @@ body {
 }
 
 .kpi-title {
+    font-family: 'Playfair Display', serif;
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -282,6 +285,7 @@ body {
 
 /* --- V2: Section Dividers --- */
 .section-divider {
+    font-family: 'Playfair Display', serif;
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -494,7 +498,7 @@ body {
 
 @media (max-width: 1024px) {
     .metrics-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .charts-grid {
@@ -542,18 +546,18 @@ body {
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
-    border-bottom: 3px solid transparent;
+    border-bottom: 4px solid transparent;
     transition: all 0.2s ease;
     font-family: inherit;
 }
 
 .tab-btn:hover {
-    color: var(--text-primary);
+    color: var(--brand-green);
 }
 
 .tab-btn.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
+    color: var(--brand-green);
+    border-bottom-color: var(--brand-green);
 }
 
 .tab-panel {
@@ -627,7 +631,7 @@ details.debug-log summary::marker {
 }
 
 .trend-up {
-    color: #059669;
+    color: var(--brand-green);
     background: #d1fae5;
 }
 
@@ -648,7 +652,7 @@ details.debug-log summary::marker {
 }
 
 .kpi-card.clickable:hover {
-    border-color: var(--accent);
+    border-color: var(--brand-green);
     transform: translateY(-2px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
