@@ -103,7 +103,6 @@
             <div id="uploadStatus" class="status-message"></div>
 
             <div class="upload-header hidden" id="uploadHeader" style="gap: 8px;">
-                <button class="full-report-btn disabled" id="btn-full-report" title="Upload a file first">↓ Download Full Report (.xlsx)</button>
                 <button class="upload-mini-btn" onclick="document.getElementById('fileInput').click()">Upload New Data</button>
             </div>
 
@@ -115,13 +114,14 @@
 
         <section id="dashboard" class="dashboard-content hidden">
             <!-- Tabs Nav -->
-            <div class="tabs-nav">
+            <div class="tabs-nav" style="align-items: center;">
                 <button class="tab-btn active" data-tab="tab-overview">Overview</button>
                 <button class="tab-btn" data-tab="tab-products">Products</button>
                 <button class="tab-btn" data-tab="tab-customers" style="display: inline-flex; align-items: center;">
                     Customers
                     <span id="churn-badge" style="display: none; align-items: center; justify-content: center; height: 18px; font-size: 11px; font-weight: 500; color: #854F0B; background-color: #FAEEDA; border-radius: 99px; padding: 2px 7px; margin-left: 6px;">0</span>
                 </button>
+                <button class="full-report-btn disabled" id="btn-full-report" title="Upload a file first" style="margin-left: auto;">↓ Download Full Report (.xlsx)</button>
             </div>
 
             <!-- TAB 1: OVERVIEW -->
