@@ -131,7 +131,7 @@
                 <button class="tab-btn" data-tab="tab-products">Products</button>
                 <button class="tab-btn" data-tab="tab-customers" style="display: inline-flex; align-items: center;">
                     Customers
-                    <span id="churn-badge" style="display: none; align-items: center; justify-content: center; height: 18px; font-size: 11px; font-weight: 500; color: #854F0B; background-color: #FAEEDA; border-radius: 99px; padding: 2px 7px; margin-left: 6px;">0</span>
+                    <span id="churn-badge" style="display: none; align-items: center; justify-content: center; height: 18px; font-size: 11px; font-weight: 600; color: #991B1B; background-color: #FEE2E2; border-radius: 99px; padding: 2px 9px; margin-left: 6px;">0</span>
                 </button>
                 <button class="full-report-btn disabled" id="btn-full-report" title="Upload a file first" style="margin-left: auto;">↓ Download Full Report (.xlsx)</button>
             </div>
@@ -330,7 +330,7 @@
                 
                 if (badge) {
                     if (total > 0) {
-                        badge.textContent = total;
+                        badge.textContent = total + ' at risk';
                         badge.style.display = 'inline-flex';
                     } else {
                         badge.style.display = 'none';
