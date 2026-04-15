@@ -74,7 +74,7 @@ body {
 }
 
 .nav-titles h1 {
-    font-family: 'Playfair Display', serif;
+    font-family: Georgia, serif;
     font-size: 1.3rem;
     font-weight: 800;
     color: white;
@@ -140,7 +140,7 @@ body {
 /* KPI CARDS */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -163,7 +163,7 @@ body {
 }
 
 .kpi-title {
-    font-family: 'Playfair Display', serif;
+    font-family: Georgia, serif;
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -184,6 +184,7 @@ body {
 }
 
 .kpi-value {
+    font-family: Georgia, serif;
     font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -193,6 +194,7 @@ body {
 }
 
 .kpi-subtitle {
+    font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
     color: var(--text-secondary);
 }
@@ -214,6 +216,7 @@ body {
 }
 
 .card-header {
+    font-family: Georgia, serif;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -285,7 +288,7 @@ body {
 
 /* --- V2: Section Dividers --- */
 .section-divider {
-    font-family: 'Playfair Display', serif;
+    font-family: Georgia, serif;
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -498,7 +501,7 @@ body {
 
 @media (max-width: 1024px) {
     .metrics-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .charts-grid {
@@ -548,7 +551,7 @@ body {
     cursor: pointer;
     border-bottom: 4px solid transparent;
     transition: all 0.2s ease;
-    font-family: inherit;
+    font-family: Georgia, serif;
 }
 
 .tab-btn:hover {

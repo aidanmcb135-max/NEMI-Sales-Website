@@ -303,13 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sub-top-product').textContent = `${(topProduct.quantity || 0).toLocaleString()} units sold`;
 
         document.getElementById('val-total-customers').textContent = analyzer.getTotalCustomers().toLocaleString();
-
-        // New metrics
-        const repeatRate = analyzer.getRepeatPurchaseRate();
-        document.getElementById('val-repeat-rate').textContent = Math.round(repeatRate * 100) + '%';
-
-        const avgDays = analyzer.getAvgDaysBetweenOrders();
-        document.getElementById('val-avg-days').textContent = avgDays > 0 ? avgDays + ' days' : '-';
     }
 
     function renderFrequencyTable(freqData) {
